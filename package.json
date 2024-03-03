@@ -1,0 +1,26 @@
+{
+  "name": "simplemod",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsx lib/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@atproto/bsky": "^0.0.36",
+    "@atproto/lexicon": "^0.3.2",
+    "@atproto/repo": "^0.3.8",
+    "@atproto/xrpc-server": "^0.4.3",
+    "@types/node": "^20.11.24",
+    "better-sqlite3": "^9.4.3",
+    "dotenv": "^16.4.5",
+    "kysely": "^0.27.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  }
+}
