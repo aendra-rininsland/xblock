@@ -88,9 +88,17 @@ const run = async () => {
       },
     },
   };
-  console.log(lexicons.validate("app.bsky.labeler.service", req.record));
-  // await agent.api.com.atproto.repo.createRecord(req);
-
+  if (
+    lexicons.validate("app.bsky.labeler.service", req.record).success &&
+    (
+      lexicons.assertValidXrpcInput("com.atproto.repo.createRecord", req) as {
+        validate: boolean;
+      }
+    ).validate
+  ) {
+    // TODO wait until launch
+    // await agent.api.com.atproto.repo.createRecord(req);
+  }
   console.log("All done 🎉");
 };
 
