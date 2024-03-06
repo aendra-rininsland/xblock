@@ -1,11 +1,10 @@
 import dotenv from "dotenv";
 import { AtpAgent, BlobRef } from "@atproto/api";
 import fs from "fs/promises";
-import { ids } from "../lexicons/lexicons";
+import { ids, lexicons } from "../lexicons/lexicons";
 
 const run = async () => {
   dotenv.config();
-
   // YOUR bluesky handle
   // Ex: user.bsky.social
   const handle = process.env.BSKY_HANDLE!;
@@ -31,7 +30,7 @@ const run = async () => {
   // NO NEED TO TOUCH ANYTHING BELOW HERE
   // -------------------------------------
 
-  if (!process.env.FEEDGEN_SERVICE_DID && !process.env.FEEDGEN_HOSTNAME) {
+  if (!process.env.FEEDGEN_SERVICE_DID && !process.env.LABELER_HOSTNAME) {
     throw new Error("Please provide a hostname in the .env file");
   }
   const feedGenDid =
@@ -59,29 +58,38 @@ const run = async () => {
     avatarRef = blobRes.data.blob;
   }
 
-  await agent.api.com.atproto.repo.createRecord({
+  const req = {
     repo: agent.session?.did ?? "",
-    collection: ids.AppBskyModerationService,
+    collection: ids.AppBskyLabelerService,
     rkey: recordName || "",
     record: {
       description: description,
       avatar: avatarRef,
       createdAt: new Date().toISOString(),
       policies: {
-        description: "We accept reports of screenshots regardless of content",
-        reportReasons: ["com.atproto.moderation.defs#reasonOther"],
-        labelValues: ["screenshot"],
+        description:
+          "Labels screenshots from Twitter because life is too short",
+        labelValues: ["twitter-screenshot"],
         labelValueDefinitions: [
           {
-            identifier: "screenshot",
+            identifier: "twitter-screenshot",
             severity: "inform",
             blurs: "media",
-            locales: [],
+            locales: [
+              {
+                lang: "en",
+                name: "Twitter screenshot",
+                description:
+                  "A screenshot taken on X.com, formerly known as Twitter",
+              },
+            ],
           },
         ],
       },
     },
-  });
+  };
+  console.log(lexicons.validate("app.bsky.labeler.service", req.record));
+  // await agent.api.com.atproto.repo.createRecord(req);
 
   console.log("All done 🎉");
 };

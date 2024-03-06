@@ -21,7 +21,4 @@ void (async function main() {
     serviceDid,
   });
   await server.start();
-  console.log(
-    `🤖 running feed generator at http://${server.cfg.listenhost}:${server.cfg.port}`
-  );
 })();

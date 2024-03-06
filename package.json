@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.ts",
-  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 0",
     "start": "tsx lib/index.ts",
@@ -19,9 +18,12 @@
     "@atproto/repo": "^0.3.8",
     "@atproto/xrpc-server": "^0.4.3",
     "@types/node": "^20.11.24",
+    "@xenova/transformers": "^2.15.1",
     "better-sqlite3": "^9.4.3",
     "dotenv": "^16.4.5",
     "kysely": "^0.27.2",
+    "onnxruntime-node": "^1.17.0",
+    "p-queue": "^8.0.1",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
   },
