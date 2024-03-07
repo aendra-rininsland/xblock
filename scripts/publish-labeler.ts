@@ -18,57 +18,60 @@ const run = async () => {
   // Ex: whats-hot
   const recordName = process.env.LABELER_SLUG;
 
-  // (Optional) A description of your feed
-  // Ex: Top trending content from the whole network
-  const description = process.env.LABELER_DESCRIPTION || "";
+  if (!recordName)
+    throw new Error("Forgot record name; please supply LABELER_SLUG env var");
 
-  // (Optional) The path to an image to be used as your feed's avatar
-  // Ex: ~/path/to/avatar.jpeg
-  const avatar: string = process.env.LABELER_AVATAR || "";
+  // // (Optional) A description of your feed
+  // // Ex: Top trending content from the whole network
+  // const description = process.env.LABELER_DESCRIPTION || "";
+
+  // // (Optional) The path to an image to be used as your feed's avatar
+  // // Ex: ~/path/to/avatar.jpeg
+  // const avatar: string = process.env.LABELER_AVATAR || "";
 
   // -------------------------------------
   // NO NEED TO TOUCH ANYTHING BELOW HERE
   // -------------------------------------
 
-  if (!process.env.FEEDGEN_SERVICE_DID && !process.env.LABELER_HOSTNAME) {
-    throw new Error("Please provide a hostname in the .env file");
-  }
-  const feedGenDid =
-    process.env.FEEDGEN_SERVICE_DID ??
-    `did:web:${process.env.FEEDGEN_HOSTNAME}`;
+  // if (!process.env.FEEDGEN_SERVICE_DID && !process.env.LABELER_HOSTNAME) {
+  //   throw new Error("Please provide a hostname in the .env file");
+  // }
+  // const labelerDid =
+  //   process.env.FEEDGEN_SERVICE_DID ??
+  //   `did:web:${process.env.LABELER_HOSTNAME}`;
 
   // only update this if in a test environment
   const agent = new AtpAgent({ service: "https://bsky.social" });
   await agent.login({ identifier: handle, password });
 
-  let avatarRef: BlobRef | undefined;
-  if (avatar) {
-    let encoding: string;
-    if (avatar.endsWith("png")) {
-      encoding = "image/png";
-    } else if (avatar.endsWith("jpg") || avatar.endsWith("jpeg")) {
-      encoding = "image/jpeg";
-    } else {
-      throw new Error("expected png or jpeg");
-    }
-    const img = await fs.readFile(avatar);
-    const blobRes = await agent.api.com.atproto.repo.uploadBlob(img, {
-      encoding,
-    });
-    avatarRef = blobRes.data.blob;
-  }
+  // let avatarRef: BlobRef | undefined;
+  // if (avatar) {
+  //   let encoding: string;
+  //   if (avatar.endsWith("png")) {
+  //     encoding = "image/png";
+  //   } else if (avatar.endsWith("jpg") || avatar.endsWith("jpeg")) {
+  //     encoding = "image/jpeg";
+  //   } else {
+  //     throw new Error("expected png or jpeg");
+  //   }
+  //   const img = await fs.readFile(avatar);
+  //   const blobRes = await agent.api.com.atproto.repo.uploadBlob(img, {
+  //     encoding,
+  //   });
+  //   avatarRef = blobRes.data.blob;
+  // }
 
   const req = {
     repo: agent.session?.did ?? "",
     collection: ids.AppBskyLabelerService,
-    rkey: recordName || "",
+    rkey: recordName,
     record: {
-      description: description,
-      avatar: avatarRef,
+      // description: description,
+      // avatar: avatarRef,
       createdAt: new Date().toISOString(),
       policies: {
         description:
-          "Labels screenshots from Twitter because life is too short",
+          "Labels screenshots from Twitter because life is too short to be that angry",
         labelValues: ["twitter-screenshot"],
         labelValueDefinitions: [
           {
@@ -96,8 +99,7 @@ const run = async () => {
       }
     ).validate
   ) {
-    // TODO wait until launch
-    // await agent.api.com.atproto.repo.createRecord(req);
+    await agent.api.com.atproto.repo.putRecord(req);
   }
   console.log("All done 🎉");
 };
