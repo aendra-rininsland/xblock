@@ -5,8 +5,9 @@ import {
 import { FirehoseSubscriptionBase, getOpsByType } from "./subscription";
 import detect from "./detect";
 import { queue } from "./queue";
-import { AppBskyEmbedImages, PostRecord } from "../atproto/packages/api/src";
+import { AppBskyEmbedImages } from "../atproto/packages/api/src";
 import { agent } from "./agent";
+import { createLabel } from "./create-label";
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleEvent(evt: RepoEvent) {
@@ -53,7 +54,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                   images.map((image) =>
                     detect(
                       image.fullsize.replace("@jpeg", "@png"),
-                      post.author.handle === "aendra.com"
+                      post.author.handle === "xblock.aendra.dev"
                     )
                   )
                 );
@@ -61,9 +62,9 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                 if (
                   scores.some(
                     ({ twitter, screenshot }) =>
-                      twitter >= 0.7 || screenshot >= 0.7
+                      twitter >= 0.6 || screenshot >= 0.6
                   ) ||
-                  post.author.handle === "aendra.com"
+                  post.author.handle === "xblock.aendra.dev"
                 ) {
                   console.log(
                     post.uri
@@ -72,11 +73,24 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                     scores
                   );
                 }
-                // await this.db
-                //   .insertInto("post")
-                //   .values(postsToCreate)
-                //   .onConflict((oc) => oc.doNothing())
-                //   .execute();
+
+                if (
+                  scores.some(
+                    ({ twitter, screenshot }) =>
+                      twitter >= 0.6 || screenshot >= 0.6
+                  ) ||
+                  post.author.handle === "xblock.aendra.dev"
+                ) {
+                  try {
+                    await createLabel(
+                      post.uri,
+                      post.cid,
+                      [] // TODO get image CIDs
+                    );
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }
               } catch (e) {
                 console.error(e);
               }

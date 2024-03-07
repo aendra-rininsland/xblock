@@ -9,7 +9,10 @@ env.backends.onnx.wasm.numThreads = 1;
 // env.allowRemoteModels = false;
 // console.log(env);
 
-const pipe = pipeline("zero-shot-image-classification", "clip-vit-base-32");
+const pipe = pipeline(
+  "zero-shot-image-classification",
+  "Xenova/clip-vit-base-patch32"
+);
 const TEMPLATE = "This is a photo of {}";
 
 export default async function detect(url: string, debug = false) {
