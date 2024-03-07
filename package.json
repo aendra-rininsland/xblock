@@ -5,7 +5,7 @@
   "main": "lib/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 0",
-    "start": "tsx lib/index.ts",
+    "start": "tsx --require dotenv/config lib/index.ts",
     "prepare": "husky",
     "postinstall": "npx @atproto/lex-cli gen-server ./lexicons ./atproto/lexicons/**/*.json"
   },
@@ -21,6 +21,7 @@
     "@xenova/transformers": "^2.15.1",
     "better-sqlite3": "^9.4.3",
     "dotenv": "^16.4.5",
+    "execa": "^8.0.1",
     "kysely": "^0.27.2",
     "onnxruntime-node": "^1.17.0",
     "p-queue": "^8.0.1",

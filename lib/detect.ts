@@ -3,44 +3,73 @@ import {
   pipeline,
   env,
 } from "@xenova/transformers";
-import { join, resolve } from "path";
-import { cwd } from "process";
+import { execa } from "execa";
 
+env.backends.onnx.wasm.numThreads = 1;
 // env.allowRemoteModels = false;
-// env.backends.onnx.wasm.numThreads = 1;
-// env.localModelPath = resolve(join(cwd()));
 // console.log(env);
 
-// const pipe = pipeline(
-//   "zero-shot-image-classification",
-//   "clip-vit-large-patch14"
-// );
-
-// console.log(env);
-
-const pipe = pipeline(
-  "zero-shot-image-classification",
-  "Xenova/clip-vit-base-patch32"
-);
+const pipe = pipeline("zero-shot-image-classification", "clip-vit-base-32");
+const TEMPLATE = "This is a photo of {}";
 
 export default async function detect(url: string, debug = false) {
-  const p = await pipe;
+  try {
+    const p = await pipe;
 
-  const { score: screenshot_score = 0 } =
-    (
-      (await p(url, [
-        "screenshot",
-        "not screenshot",
-      ])) as ZeroShotImageClassificationOutput[]
-    ).find((a) => a.label === "screenshot") || {};
+    const hypothesisScreenshot = (await p(
+      url,
+      ["screenshot", "not screenshot"],
+      {
+        hypothesis_template: TEMPLATE,
+      }
+    )) as ZeroShotImageClassificationOutput[];
 
-  const { score: twitter_score = 0 } =
-    (
-      (await p(url, [
-        "twitter",
-        "not twitter",
-      ])) as ZeroShotImageClassificationOutput[]
-    ).find((inf) => inf.label === "twitter") || {};
+    const hypothesisTwitter = (await p(url, ["Twitter", "not Twitter"], {
+      hypothesis_template: TEMPLATE,
+    })) as ZeroShotImageClassificationOutput[];
 
-  return { screenshot_score, twitter_score };
+    return [...hypothesisScreenshot, ...hypothesisTwitter].reduce(
+      (a: any, c: any) => {
+        a[c.label] = c.value;
+        return a;
+      },
+      {}
+    );
+  } catch (e) {
+    return { "not screenshot": 0, screenshot: 0, "not Twitter": 0, Twitter: 0 };
+  }
 }
+
+export const detectPython = async (url: string, debug = false) => {
+  try {
+    const { stdout, stderr } = await execa(
+      "/Users/aendra.rininsland/Projects/simplemod/.venv/bin/python",
+      ["/Users/aendra.rininsland/Projects/simplemod/lib/detect.py", url]
+    );
+
+    const result = JSON.parse(stdout);
+    return result.reduce((a: any, c: any) => {
+      a[c.label] = c.value;
+      return a;
+    }, {});
+    // const p = await pipe;
+
+    // const { score: screenshot_score = 0 } =
+    //   (
+    //     (await p(url, ["screenshot", "not screenshot"], {
+    //       hypothesis_template: "This is a photo of {}",
+    //     })) as ZeroShotImageClassificationOutput[]
+    //   ).find((a) => a.label === "screenshot") || {};
+
+    // const { score: twitter_score = 0 } =
+    //   (
+    //     (await p(url, ["twitter", "not twitter"], {
+    //       hypothesis_template: "This is a photo of {}",
+    //     })) as ZeroShotImageClassificationOutput[]
+    //   ).find((inf) => inf.label === "twitter") || {};
+
+    // return { screenshot_score, twitter_score };
+  } catch (e) {
+    return { "not screenshot": 0, screenshot: 0, "not Twitter": 0, Twitter: 0 };
+  }
+};

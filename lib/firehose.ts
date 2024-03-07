@@ -36,44 +36,53 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
         .execute();
     }
     if (postsToCreate.length > 0) {
-      const {
-        data: { posts },
-      } = await agent.app.bsky.feed.getPosts({
-        uris: postsToCreate.map((post) => post.uri),
-      });
-      for (const post of posts) {
-        if (AppBskyEmbedImages.isView(post.embed))
-          queue.add(async () => {
-            try {
-              const images = post?.embed
-                ?.images as AppBskyEmbedImages.ViewImage[];
-              const scores = await Promise.all(
-                images.map((image) =>
-                  detect(image.fullsize, post.author.handle === "aendra.com")
-                )
-              );
+      try {
+        const {
+          data: { posts },
+        } = await agent.app.bsky.feed.getPosts({
+          uris: postsToCreate.map((post) => post.uri),
+        });
 
-              if (
-                scores.some(({ twitter_score }) => twitter_score >= 0.8) ||
-                post.author.handle === "aendra.com"
-              ) {
-                console.log(
-                  post.uri
-                    .replace("at://", "https://bsky.app/profile/")
-                    .replace("app.bsky.feed.post", "post"),
-                  scores
+        for (const post of posts) {
+          if (AppBskyEmbedImages.isView(post.embed))
+            queue.add(async () => {
+              try {
+                const images = post?.embed
+                  ?.images as AppBskyEmbedImages.ViewImage[];
+                const scores = await Promise.all(
+                  images.map((image) =>
+                    detect(
+                      image.fullsize.replace("@jpeg", "@png"),
+                      post.author.handle === "aendra.com"
+                    )
+                  )
                 );
+
+                if (
+                  scores.some(
+                    ({ twitter, screenshot }) =>
+                      twitter >= 0.7 || screenshot >= 0.7
+                  ) ||
+                  post.author.handle === "aendra.com"
+                ) {
+                  console.log(
+                    post.uri
+                      .replace("at://", "https://bsky.app/profile/")
+                      .replace("app.bsky.feed.post", "post"),
+                    scores
+                  );
+                }
+                // await this.db
+                //   .insertInto("post")
+                //   .values(postsToCreate)
+                //   .onConflict((oc) => oc.doNothing())
+                //   .execute();
+              } catch (e) {
+                console.error(e);
               }
-              // await this.db
-              //   .insertInto("post")
-              //   .values(postsToCreate)
-              //   .onConflict((oc) => oc.doNothing())
-              //   .execute();
-            } catch (e) {
-              console.error(e);
-            }
-          });
-      }
+            });
+        }
+      } catch {}
     }
   }
 }

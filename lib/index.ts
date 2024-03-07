@@ -1,4 +1,3 @@
-import "dotenv/config";
 import FeedGenerator from "./server";
 import { maybeStr, maybeInt } from "./util";
 
