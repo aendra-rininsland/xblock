@@ -6,7 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 0",
     "start": "tsx --require dotenv/config lib/index.ts",
-    "prepare": "husky",
     "gen-lexicons": "npx @atproto/lex-cli gen-server ./lexicons ./atproto/lexicons/**/*.json",
     "dev:start-db": "docker run -d -e POSTGRES_USER=ozone -e POSTGRES_PASSWORD=ozone -e POSTGRES_DATABASE=ozone -p 5432:5432 postgres"
   },
@@ -29,8 +28,5 @@
     "p-queue": "^8.0.1",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
-  },
-  "devDependencies": {
-    "husky": "^9.0.11"
   }
 }
