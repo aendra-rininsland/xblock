@@ -1,8 +1,9 @@
 import {
   OutputSchema as RepoEvent,
   isCommit,
-} from "../atproto/packages/bsky/src/lexicon/types/com/atproto/sync/subscribeRepos"; // TODO fix
-import { AppBskyEmbedImages } from "../atproto/packages/api/src"; // TODO fix
+} from "@atproto/bsky/src/lexicon/types/com/atproto/sync/subscribeRepos"; // TODO fix
+
+import { AppBskyEmbedImages } from "@atproto/api/src"; // TODO fix
 import { FirehoseSubscriptionBase, getOpsByType } from "./subscription";
 import detect from "./detect";
 import { createLabel } from "./create-label";

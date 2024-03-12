@@ -1,16 +1,16 @@
 import { Subscription } from "@atproto/xrpc-server";
 import { cborToLexRecord, readCar } from "@atproto/repo";
 import { BlobRef } from "@atproto/lexicon";
-import { ids, lexicons } from "../lexicons/lexicons";
-import { Record as PostRecord } from "../lexicons/types/app/bsky/feed/post";
-import { Record as RepostRecord } from "../lexicons/types/app/bsky/feed/repost";
-import { Record as LikeRecord } from "../lexicons/types/app/bsky/feed/like";
-import { Record as FollowRecord } from "../lexicons/types/app/bsky/graph/follow";
+import { ids, lexicons } from "@atproto/bsky/src/lexicon/lexicons";
+import { Record as PostRecord } from "@atproto/bsky/src/lexicon/types/app/bsky/feed/post";
+import { Record as RepostRecord } from "@atproto/bsky/src/lexicon/types/app/bsky/feed/repost";
+import { Record as LikeRecord } from "@atproto/bsky/src/lexicon/types/app/bsky/feed/like";
+import { Record as FollowRecord } from "@atproto/bsky/src/lexicon/types/app/bsky/graph/follow";
 import {
   Commit,
   OutputSchema as RepoEvent,
   isCommit,
-} from "../lexicons/types/com/atproto/sync/subscribeRepos";
+} from "@atproto/bsky/src/lexicon/types/com/atproto/sync/subscribeRepos";
 import { AppContext } from "@atproto/ozone";
 import { BskyAgent } from "@atproto/api";
 import DatabaseSchema from "@atproto/ozone/dist/db/schema";
