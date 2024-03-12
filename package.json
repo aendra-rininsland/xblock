@@ -7,9 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 0",
     "start": "tsx --require dotenv/config lib/index.ts",
     "prepare": "husky",
-    "postinstall": "npx @atproto/lex-cli gen-server ./lexicons ./atproto/lexicons/**/*.json",
-    "dev:start-db": "docker run -d -e POSTGRES_USER=ozone -e POSTGRES_PASSWORD=ozone -e POSTGRES_DATABASE=ozone -p 5432:5432 postgres",
-    "dev:migrate": "npx @atproto/ozone"
+    "gen-lexicons": "npx @atproto/lex-cli gen-server ./lexicons ./atproto/lexicons/**/*.json",
+    "dev:start-db": "docker run -d -e POSTGRES_USER=ozone -e POSTGRES_PASSWORD=ozone -e POSTGRES_DATABASE=ozone -p 5432:5432 postgres"
   },
   "keywords": [],
   "author": "",
