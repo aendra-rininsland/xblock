@@ -1,19 +1,6 @@
-import { Database } from './db'
-import { DidResolver } from '@atproto/identity'
+import { envToCfg, envToSecrets, readEnv } from "@atproto/ozone";
 
-export type AppContext = {
-  db: Database
-  didResolver: DidResolver
-  cfg: Config
-}
+const env = readEnv();
 
-export type Config = {
-  port: number
-  listenhost: string
-  hostname: string
-  sqliteLocation: string
-  subscriptionEndpoint: string
-  serviceDid: string
-  publisherDid: string
-  subscriptionReconnectDelay: number
-}
+export const config = envToCfg(env);
+export const secrets = envToSecrets(env);

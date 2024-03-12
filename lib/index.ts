@@ -1,23 +1,31 @@
-import FeedGenerator from "./server";
-import { maybeStr, maybeInt } from "./util";
+/**
+ * @file
+ * XBlock Twitter Screenshot Blocker
+ */
+
+import ozone from "@atproto/ozone";
+import { config, secrets } from "./config";
+import { FirehoseSubscription } from "./firehose";
 
 void (async function main() {
-  const hostname = maybeStr(process.env.FEEDGEN_HOSTNAME) ?? "example.com";
-  const serviceDid =
-    maybeStr(process.env.FEEDGEN_SERVICE_DID) ?? `did:web:${hostname}`;
-  const server = FeedGenerator.create({
-    port: maybeInt(process.env.FEEDGEN_PORT) ?? 3000,
-    listenhost: maybeStr(process.env.FEEDGEN_LISTENHOST) ?? "localhost",
-    sqliteLocation: maybeStr(process.env.FEEDGEN_SQLITE_LOCATION) ?? ":memory:",
-    subscriptionEndpoint:
-      maybeStr(process.env.FEEDGEN_SUBSCRIPTION_ENDPOINT) ??
-      "wss://bsky.network",
-    publisherDid:
-      maybeStr(process.env.FEEDGEN_PUBLISHER_DID) ?? "did:example:alice",
-    subscriptionReconnectDelay:
-      maybeInt(process.env.FEEDGEN_SUBSCRIPTION_RECONNECT_DELAY) ?? 3000,
-    hostname,
-    serviceDid,
+  const service = await ozone.create(config, secrets, {});
+
+  const firehose = new FirehoseSubscription(service.ctx, "wss://bsky.network");
+
+  service.ctx.db.migrateToLatestOrThrow().then(async () => {
+    // TODO make this a proper migration somehow
+    try {
+      await service.ctx.db.db.schema
+        .createTable("sub_state")
+        .addColumn("service", "varchar", (col) => col.primaryKey())
+        .addColumn("cursor", "integer", (col) => col.notNull())
+        .execute();
+    } catch {}
   });
-  await server.start();
+
+  await service.start();
+
+  firehose.run(3000);
+
+  console.log(`Running on port ${service.ctx.cfg.service.port}`);
 })();

@@ -1,5 +1,5 @@
 import { lexicons } from "../lexicons/lexicons";
-import { loggedIn } from "./agent";
+import { loggedIn } from "../old/agent";
 
 export const createLabel = async (
   uri: string,

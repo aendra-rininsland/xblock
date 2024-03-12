@@ -32,8 +32,8 @@ export default async function detect(url: string, debug = false) {
     })) as ZeroShotImageClassificationOutput[];
 
     return [...hypothesisScreenshot, ...hypothesisTwitter].reduce(
-      (a: any, c: any) => {
-        a[c.label] = c.value;
+      (a: any, c: { score: number; label: string }) => {
+        a[c.label] = c.score;
         return a;
       },
       {}

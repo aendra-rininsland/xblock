@@ -1,12 +1,10 @@
 import {
   OutputSchema as RepoEvent,
   isCommit,
-} from "../atproto/packages/bsky/src/lexicon/types/com/atproto/sync/subscribeRepos";
+} from "../atproto/packages/bsky/src/lexicon/types/com/atproto/sync/subscribeRepos"; // TODO fix
+import { AppBskyEmbedImages } from "../atproto/packages/api/src"; // TODO fix
 import { FirehoseSubscriptionBase, getOpsByType } from "./subscription";
 import detect from "./detect";
-import { queue } from "./queue";
-import { AppBskyEmbedImages } from "../atproto/packages/api/src";
-import { agent } from "./agent";
 import { createLabel } from "./create-label";
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
@@ -31,22 +29,22 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       });
 
     if (postsToDelete.length > 0) {
-      await this.db
-        .deleteFrom("post")
-        .where("uri", "in", postsToDelete)
-        .execute();
+      // await this.db
+      //   .deleteFrom("post")
+      //   .where("uri", "in", postsToDelete)
+      //   .execute();
     }
     if (postsToCreate.length > 0) {
       try {
         const {
           data: { posts },
-        } = await agent.app.bsky.feed.getPosts({
+        } = await this.agent.app.bsky.feed.getPosts({
           uris: postsToCreate.map((post) => post.uri),
         });
 
         for (const post of posts) {
           if (AppBskyEmbedImages.isView(post.embed))
-            queue.add(async () => {
+            this.ctx.backgroundQueue.add(async () => {
               try {
                 const images = post?.embed
                   ?.images as AppBskyEmbedImages.ViewImage[];
@@ -60,10 +58,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                 );
 
                 if (
-                  scores.some(
-                    ({ twitter, screenshot }) =>
-                      twitter >= 0.6 || screenshot >= 0.6
-                  ) ||
+                  scores.some(({ Twitter }) => Twitter >= 0.9) ||
                   post.author.handle === "xblock.aendra.dev"
                 ) {
                   console.log(
@@ -74,23 +69,23 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                   );
                 }
 
-                if (
-                  scores.some(
-                    ({ twitter, screenshot }) =>
-                      twitter >= 0.6 || screenshot >= 0.6
-                  ) ||
-                  post.author.handle === "xblock.aendra.dev"
-                ) {
-                  try {
-                    await createLabel(
-                      post.uri,
-                      post.cid,
-                      [] // TODO get image CIDs
-                    );
-                  } catch (e) {
-                    console.error(e);
-                  }
-                }
+                // if (
+                //   scores.some(
+                //     ({ twitter, screenshot }) =>
+                //       twitter >= 0.8 || screenshot >= 0.8
+                //   ) ||
+                //   post.author.handle === "xblock.aendra.dev"
+                // ) {
+                //   try {
+                //     await createLabel(
+                //       post.uri,
+                //       post.cid,
+                //       [] // TODO get image CIDs
+                //     );
+                //   } catch (e) {
+                //     console.error(e);
+                //   }
+                // }
               } catch (e) {
                 console.error(e);
               }

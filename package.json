@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 0",
     "start": "tsx --require dotenv/config lib/index.ts",
     "prepare": "husky",
-    "postinstall": "npx @atproto/lex-cli gen-server ./lexicons ./atproto/lexicons/**/*.json"
+    "postinstall": "npx @atproto/lex-cli gen-server ./lexicons ./atproto/lexicons/**/*.json",
+    "dev:start-db": "docker run -d -e POSTGRES_USER=ozone -e POSTGRES_PASSWORD=ozone -e POSTGRES_DATABASE=ozone -p 5432:5432 postgres",
+    "dev:migrate": "npx @atproto/ozone"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +17,7 @@
   "dependencies": {
     "@atproto/bsky": "^0.0.36",
     "@atproto/lexicon": "^0.3.2",
+    "@atproto/ozone": "^0.0.16",
     "@atproto/repo": "^0.3.8",
     "@atproto/xrpc-server": "^0.4.3",
     "@types/node": "^20.11.24",
