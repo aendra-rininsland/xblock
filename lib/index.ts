@@ -12,7 +12,7 @@ void (async function main() {
 
   const firehose = new FirehoseSubscription(service.ctx, "wss://bsky.network");
 
-  service.ctx.db.migrateToLatestOrThrow().then(async () => {
+  await service.ctx.db.migrateToLatestOrThrow().then(async () => {
     // TODO make this a proper migration somehow
     try {
       await service.ctx.db.db.schema
