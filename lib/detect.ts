@@ -55,23 +55,6 @@ export const detectPython = async (url: string, debug = false) => {
       a[c.label] = c.value;
       return a;
     }, {});
-    // const p = await pipe;
-
-    // const { score: screenshot_score = 0 } =
-    //   (
-    //     (await p(url, ["screenshot", "not screenshot"], {
-    //       hypothesis_template: "This is a photo of {}",
-    //     })) as ZeroShotImageClassificationOutput[]
-    //   ).find((a) => a.label === "screenshot") || {};
-
-    // const { score: twitter_score = 0 } =
-    //   (
-    //     (await p(url, ["twitter", "not twitter"], {
-    //       hypothesis_template: "This is a photo of {}",
-    //     })) as ZeroShotImageClassificationOutput[]
-    //   ).find((inf) => inf.label === "twitter") || {};
-
-    // return { screenshot_score, twitter_score };
   } catch (e) {
     return { "not screenshot": 0, screenshot: 0, "not Twitter": 0, Twitter: 0 };
   }

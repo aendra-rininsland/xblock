@@ -1,6 +1,4 @@
 import { ModerationService } from "@atproto/ozone/dist/mod-service";
-import { lexicons } from "../lexicons/lexicons";
-import { loggedIn } from "../old/agent";
 
 export const createLabel = async (
   uri: string,
@@ -8,10 +6,14 @@ export const createLabel = async (
   modService: ModerationService
 ) => {
   try {
-    console.info(`ADDING LABEL -- ${uri} ${cid} (noop)`);
-    // await modService.formatAndCreateLabels(uri, cid, {
-    //   create: ["twitter-screenshot"],
-    // });
+    console.info(
+      `ADDING LABEL:\n\n${uri} -- ${cid}\n\n${uri
+        .replace("at://", "https://bsky.app/profile/")
+        .replace("app.bsky.feed.post", "post")}`
+    );
+    return modService.formatAndCreateLabels(uri, cid, {
+      create: ["twitter-screenshot"],
+    });
   } catch (e) {
     console.error(e);
   }

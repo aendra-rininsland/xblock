@@ -66,13 +66,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                   );
                 }
 
-                if (
-                  scores.some(
-                    ({ twitter, screenshot }) =>
-                      twitter >= 0.8 || screenshot >= 0.8
-                  ) ||
-                  post.author.handle === "xblock.aendra.dev"
-                ) {
+                if (scores.some(({ twitter }) => twitter >= 0.9)) {
                   try {
                     await createLabel(post.uri, post.cid, this.modService);
                   } catch (e) {
