@@ -28,12 +28,6 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
         };
       });
 
-    if (postsToDelete.length > 0) {
-      // await this.db
-      //   .deleteFrom("post")
-      //   .where("uri", "in", postsToDelete)
-      //   .execute();
-    }
     if (postsToCreate.length > 0) {
       try {
         const {
@@ -58,7 +52,10 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                 );
 
                 if (
-                  scores.some(({ Twitter }) => Twitter >= 0.9) ||
+                  scores.some(
+                    ({ Twitter, screenshot }) =>
+                      Twitter >= 0.8 || screenshot >= 0.9
+                  ) ||
                   post.author.handle === "xblock.aendra.dev"
                 ) {
                   console.log(
@@ -69,23 +66,19 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                   );
                 }
 
-                // if (
-                //   scores.some(
-                //     ({ twitter, screenshot }) =>
-                //       twitter >= 0.8 || screenshot >= 0.8
-                //   ) ||
-                //   post.author.handle === "xblock.aendra.dev"
-                // ) {
-                //   try {
-                //     await createLabel(
-                //       post.uri,
-                //       post.cid,
-                //       [] // TODO get image CIDs
-                //     );
-                //   } catch (e) {
-                //     console.error(e);
-                //   }
-                // }
+                if (
+                  scores.some(
+                    ({ twitter, screenshot }) =>
+                      twitter >= 0.8 || screenshot >= 0.8
+                  ) ||
+                  post.author.handle === "xblock.aendra.dev"
+                ) {
+                  try {
+                    await createLabel(post.uri, post.cid, this.modService);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }
               } catch (e) {
                 console.error(e);
               }
