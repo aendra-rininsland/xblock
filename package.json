@@ -18,8 +18,9 @@
     "@atproto/ozone": "^0.0.16",
     "@atproto/repo": "^0.3.8",
     "@atproto/xrpc-server": "^0.4.3",
+    "@huggingface/inference": "^2.6.4",
     "@types/node": "^20.11.24",
-    "@xenova/transformers": "^2.15.1",
+    "@xenova/transformers": "github:xenova/transformers.js#v3",
     "better-sqlite3": "^9.4.3",
     "dotenv": "^16.4.5",
     "execa": "^8.0.1",
@@ -28,5 +29,8 @@
     "p-queue": "^8.0.1",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "glob": "^10.3.10"
   }
 }

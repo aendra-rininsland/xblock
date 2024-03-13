@@ -5,7 +5,7 @@ import {
 
 import { AppBskyEmbedImages } from "@atproto/api/src"; // TODO fix
 import { FirehoseSubscriptionBase, getOpsByType } from "./subscription";
-import detect from "./detect";
+import { infer } from "./detect";
 import { createLabel } from "./create-label";
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
@@ -45,18 +45,12 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                   ?.images as AppBskyEmbedImages.ViewImage[];
                 const scores = await Promise.all(
                   images.map((image) =>
-                    detect(
-                      image.fullsize.replace("@jpeg", "@png"),
-                      post.author.handle === "xblock.aendra.dev"
-                    )
+                    infer(image.fullsize.replace("@jpeg", "@png"))
                   )
                 );
 
                 if (
-                  scores.some(
-                    ({ Twitter, screenshot }) =>
-                      Twitter >= 0.8 || screenshot >= 0.9
-                  ) ||
+                  scores.some(({ Twitter }) => Twitter >= 0.8) ||
                   post.author.handle === "xblock.aendra.dev"
                 ) {
                   console.log(
@@ -67,7 +61,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                   );
                 }
 
-                if (scores.some(({ twitter }) => twitter >= 0.9)) {
+                if (scores.some(({ Twitter }) => Twitter >= 0.9)) {
                   try {
                     await createLabel(post.uri, post.cid, this.modService);
                   } catch (e) {
