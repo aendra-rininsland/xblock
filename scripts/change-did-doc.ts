@@ -31,7 +31,7 @@ void (async function () {
     rotationKeys: [serviceKey.did(), ...rotationKeys],
     verificationMethods: {
       ...getDidCredentials.data.verificationMethods,
-      atproto_labeler: serviceKey.did(),
+      atproto_label: serviceKey.did(),
     },
     services: {
       ...getDidCredentials.data.services,

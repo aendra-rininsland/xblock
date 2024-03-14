@@ -44,11 +44,14 @@ const run = async () => {
   const agent = new AtpAgent({ service: "https://bsky.social" });
   await agent.login({ identifier: handle, password });
 
-  await agent.api.com.atproto.repo.deleteRecord({
-    repo: agent.session?.did ?? "",
-    collection: "app.bsky.labeler.service",
-    rkey: "self",
-  });
+  try {
+    await agent.api.com.atproto.repo.deleteRecord({
+      repo: agent.session?.did ?? "",
+      collection: "app.bsky.labeler.service",
+      rkey: "self",
+    });
+    console.log("old /self record deleted");
+  } catch (e) {}
 
   const req = {
     repo: agent.session?.did ?? "",
