@@ -11,9 +11,9 @@ export const createLabel = async (
         .replace("at://", "https://bsky.app/profile/")
         .replace("app.bsky.feed.post", "post")}`
     );
-    return modService.formatAndCreateLabels(uri, cid, {
-      create: ["twitter-screenshot"],
-    });
+    // return modService.formatAndCreateLabels(uri, cid, {
+    //   create: ["twitter-screenshot"],
+    // });
   } catch (e) {
     console.error(e);
   }

@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { AtpAgent, BlobRef } from "@atproto/api";
 import fs from "fs/promises";
-import { ids, lexicons } from "../lexicons/lexicons";
+import { ids, lexicons } from "@atproto/bsky/src/lexicon/lexicons";
 
 const run = async () => {
   dotenv.config();
@@ -44,37 +44,33 @@ const run = async () => {
   const agent = new AtpAgent({ service: "https://bsky.social" });
   await agent.login({ identifier: handle, password });
 
-  // let avatarRef: BlobRef | undefined;
-  // if (avatar) {
-  //   let encoding: string;
-  //   if (avatar.endsWith("png")) {
-  //     encoding = "image/png";
-  //   } else if (avatar.endsWith("jpg") || avatar.endsWith("jpeg")) {
-  //     encoding = "image/jpeg";
-  //   } else {
-  //     throw new Error("expected png or jpeg");
-  //   }
-  //   const img = await fs.readFile(avatar);
-  //   const blobRes = await agent.api.com.atproto.repo.uploadBlob(img, {
-  //     encoding,
-  //   });
-  //   avatarRef = blobRes.data.blob;
-  // }
+  await agent.api.com.atproto.repo.deleteRecord({
+    repo: agent.session?.did ?? "",
+    collection: "app.bsky.labeler.service",
+    rkey: "self",
+  });
 
   const req = {
     repo: agent.session?.did ?? "",
-    collection: ids.AppBskyLabelerService,
-    rkey: recordName,
+    collection: "app.bsky.labeler.service",
+    rkey: "self",
     record: {
-      // description: description,
-      // avatar: avatarRef,
       createdAt: new Date().toISOString(),
       policies: {
         description:
-          "Labels screenshots from Twitter because life is too short to be that angry",
-        labelValues: ["twitter-screenshot"],
+          "Labels screenshots from Twitter (and elsewhere) because life is too short to be that angry",
+        labelValues: [
+          "twitter-screenshot",
+          "twitter-screenshot-reply",
+          "facebook-screenshot",
+          "facebook-screenshot-reply",
+          "threads-screenshot",
+          "threads-screenshot-reply",
+        ],
         labelValueDefinitions: [
           {
+            adultsOnly: false,
+            defaultSetting: "warn",
             identifier: "twitter-screenshot",
             severity: "inform",
             blurs: "media",
@@ -87,20 +83,81 @@ const run = async () => {
               },
             ],
           },
+          {
+            adultsOnly: false,
+            defaultSetting: "warn",
+            identifier: "twitter-screenshot-reply",
+            severity: "inform",
+            blurs: "none",
+            locales: [
+              {
+                lang: "en",
+                name: "A reply to a Twitter screenshot",
+                description: "A reply to a Twitter screenshot",
+              },
+            ],
+          },
+          {
+            adultsOnly: false,
+            defaultSetting: "warn",
+            identifier: "threads-screenshot",
+            severity: "inform",
+            blurs: "media",
+            locales: [
+              {
+                lang: "en",
+                name: "Threads screenshot",
+                description: "A screenshot taken on Threads",
+              },
+            ],
+          },
+          {
+            adultsOnly: false,
+            defaultSetting: "warn",
+            identifier: "threads-screenshot-reply",
+            severity: "inform",
+            blurs: "none",
+            locales: [
+              {
+                lang: "en",
+                name: "Threads screenshot reply",
+                description: "A reply to a Threads screenshot",
+              },
+            ],
+          },
+          {
+            adultsOnly: false,
+            defaultSetting: "warn",
+            identifier: "facebook-screenshot",
+            severity: "inform",
+            blurs: "media",
+            locales: [
+              {
+                lang: "en",
+                name: "Facebook screenshot",
+                description: "A screenshot taken on Facebook",
+              },
+            ],
+          },
+          {
+            adultsOnly: false,
+            defaultSetting: "warn",
+            identifier: "facebook-screenshot-reply",
+            severity: "inform",
+            blurs: "none",
+            locales: [
+              {
+                lang: "en",
+                name: "Facebook screenshot reply",
+                description: "A reply to a Facebook screenshot",
+              },
+            ],
+          },
         ],
       },
     },
   };
-  if (
-    lexicons.validate("app.bsky.labeler.service", req.record).success &&
-    (
-      lexicons.assertValidXrpcInput("com.atproto.repo.createRecord", req) as {
-        validate: boolean;
-      }
-    ).validate
-  ) {
-    await agent.api.com.atproto.repo.putRecord(req);
-  }
+  await agent.api.com.atproto.repo.putRecord(req);
   console.log("All done 🎉");
 };
 

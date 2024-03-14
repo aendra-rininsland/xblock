@@ -3,25 +3,32 @@
  * XBlock Twitter Screenshot Blocker
  */
 
-import ozone from "@atproto/ozone";
+import ozone, { Database } from "@atproto/ozone";
 import { config, secrets } from "./config";
 import { FirehoseSubscription } from "./firehose";
 
 void (async function main() {
-  const service = await ozone.create(config, secrets, {});
+  // Separate migration db in case migration changes some connection state that we need in the tests, e.g. "alter database ... set ..."
+  const migrationDb = new Database({
+    schema: config.db.postgresSchema,
+    url: config.db.postgresUrl,
+  });
 
-  const firehose = new FirehoseSubscription(service.ctx, "wss://bsky.network");
-
-  await service.ctx.db.migrateToLatestOrThrow().then(async () => {
-    // TODO make this a proper migration somehow
-    try {
-      await service.ctx.db.db.schema
+  try {
+    await migrationDb.migrateToLatestOrThrow().then(async () => {
+      return migrationDb.db.schema
         .createTable("sub_state")
         .addColumn("service", "varchar", (col) => col.primaryKey())
         .addColumn("cursor", "integer", (col) => col.notNull())
         .execute();
-    } catch {}
-  });
+    });
+  } catch (e) {}
+
+  await migrationDb.close();
+
+  const service = await ozone.create(config, secrets, {});
+
+  const firehose = new FirehoseSubscription(service.ctx, "wss://bsky.network");
 
   await service.start();
 
