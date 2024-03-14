@@ -15,7 +15,7 @@
   "dependencies": {
     "@atproto/bsky": "^0.0.36",
     "@atproto/lexicon": "^0.3.2",
-    "@atproto/ozone": "^0.0.16",
+    "@atproto/ozone": "^0.1.1",
     "@atproto/repo": "^0.3.8",
     "@atproto/xrpc-server": "^0.4.3",
     "@huggingface/inference": "^2.6.4",
