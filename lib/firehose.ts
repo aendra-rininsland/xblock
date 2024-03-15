@@ -5,15 +5,14 @@ import {
 
 import { AppBskyEmbedImages } from "@atproto/api/src"; // TODO fix
 import { FirehoseSubscriptionBase, getOpsByType } from "./subscription";
-import { infer } from "./detect";
-import { createLabel } from "./create-label";
+import * as detect from "./detect";
+import { createReport } from "./moderate";
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleEvent(evt: RepoEvent) {
     if (!isCommit(evt)) return;
     const ops = await getOpsByType(evt);
 
-    const postsToDelete = ops.posts.deletes.map((del) => del.uri);
     const postsToCreate = ops.posts.creates
       .filter((create) => AppBskyEmbedImages.isMain(create.record.embed))
       .map((create) => {
@@ -31,11 +30,18 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
 
     if (postsToCreate.length > 0) {
       try {
-        const {
-          data: { posts },
-        } = await this.agent.app.bsky.feed.getPosts({
-          uris: postsToCreate.map((post) => post.uri),
-        });
+        const posts = await this.agent.app.bsky.feed
+          .getPosts({
+            uris: postsToCreate.map((post) => post.uri),
+          })
+          .then((posts) =>
+            posts.data.posts.map((post) => ({
+              ...post,
+              evt: postsToCreate.find(
+                (p) => p.did === post.did && p.cid === post.cid
+              ),
+            }))
+          );
 
         for (const post of posts) {
           if (AppBskyEmbedImages.isView(post.embed))
@@ -43,27 +49,20 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
               try {
                 const images = post?.embed
                   ?.images as AppBskyEmbedImages.ViewImage[];
-                const scores = await Promise.all(
+                const detections = await Promise.all(
                   images.map((image) =>
-                    infer(image.fullsize.replace("@jpeg", "@png"))
+                    detect.isScreenshot(image.fullsize.replace("@jpeg", "@png"))
                   )
                 );
 
-                if (
-                  scores.some(({ Twitter }) => Twitter >= 0.8) ||
-                  post.author.handle === "xblock.aendra.dev"
-                ) {
-                  console.log(
-                    post.uri
+                if (detections.some((d) => d === true)) {
+                  console.info(
+                    `REPORT:\n\n${post.uri} -- ${post.cid}\n\n${post.uri
                       .replace("at://", "https://bsky.app/profile/")
-                      .replace("app.bsky.feed.post", "post"),
-                    scores
+                      .replace("app.bsky.feed.post", "post")}`
                   );
-                }
-
-                if (scores.some(({ Twitter }) => Twitter >= 0.9)) {
                   try {
-                    await createLabel(post.uri, post.cid, this.modService);
+                    await createReport(post, this.modService);
                   } catch (e) {
                     console.error(e);
                   }

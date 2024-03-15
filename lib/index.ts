@@ -30,9 +30,5 @@ void (async function main() {
 
   const firehose = new FirehoseSubscription(service.ctx, "wss://bsky.network");
 
-  await service.start();
-
   firehose.run(3000);
-
-  console.log(`Running on port ${service.ctx.cfg.service.port}`);
 })();

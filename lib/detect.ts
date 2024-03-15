@@ -18,6 +18,25 @@ const hf = new HfInference(process.env.HUGGING_FACE);
 // env.allowRemoteModels = false;
 // console.log(env);
 
+export const isScreenshot = async (url: string): Promise<Boolean> =>
+  hf
+    .imageClassification(
+      {
+        data: await (await fetch(url)).blob(), //new Blob([readFileSync(url)]),
+      },
+      { retry_on_error: true }
+    )
+    .then((result) => {
+      // console.log(result);
+      return result.some(
+        (d) =>
+          d.label === "web site, website, internet site, site" && d.score > 0.98
+      );
+    })
+    .catch(() => {
+      return false;
+    });
+
 export const infer = async (
   url: string
 ): Promise<{ Twitter: number; "not Twitter": number }> =>
