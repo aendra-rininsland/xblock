@@ -7,8 +7,18 @@ import { AppBskyEmbedImages } from "@atproto/api/src"; // TODO fix
 import { FirehoseSubscriptionBase, getOpsByType } from "./subscription";
 import * as detect from "./detect";
 import { createReport } from "./moderate";
+import PQueue from "p-queue";
+
+let i = 0;
+const IGNORED_HANDLES = [
+  "nowbreezing.ntw.app",
+  "moinbot.bsky.social",
+  "kctv.bsky.social",
+  "aerialcolorado.bsky.social",
+];
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
+  backgroundQueue = new PQueue({ autoStart: true });
   async handleEvent(evt: RepoEvent) {
     if (!isCommit(evt)) return;
     const ops = await getOpsByType(evt);
@@ -45,24 +55,40 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
 
         for (const post of posts) {
           if (AppBskyEmbedImages.isView(post.embed))
-            this.ctx.backgroundQueue.add(async () => {
+            this.backgroundQueue.add(async () => {
               try {
                 const images = post?.embed
                   ?.images as AppBskyEmbedImages.ViewImage[];
                 const detections = await Promise.all(
-                  images.map((image) =>
-                    detect.isScreenshot(image.fullsize.replace("@jpeg", "@png"))
-                  )
+                  // images.map((d) => detect.detectPython(d.fullsize))
+                  images.flatMap((d) => detect.classify(d.fullsize))
                 );
 
-                if (detections.some((d) => d === true)) {
+                const maxTwitterScore = Math.max(
+                  ...detections
+                    .flat()
+                    .filter((d: any) => d.label === "twitter")
+                    .map((d: any) => d.score)
+                );
+
+                if (
+                  maxTwitterScore >= 0.98 &&
+                  !IGNORED_HANDLES.includes(post.author.handle.toLowerCase())
+                  // detections.some(
+                  //   (d) => d.label === "twitter" && d.score > 0.92
+                  // )
+                ) {
+                  // console.log(detections);
                   console.info(
-                    `REPORT:\n\n${post.uri} -- ${post.cid}\n\n${post.uri
+                    ++i,
+                    maxTwitterScore,
+                    detections,
+                    post.uri
                       .replace("at://", "https://bsky.app/profile/")
-                      .replace("app.bsky.feed.post", "post")}`
+                      .replace("app.bsky.feed.post", "post")
                   );
                   try {
-                    await createReport(post, this.modService);
+                    // await createReport(post, maxTwitterScore, this.agent);
                   } catch (e) {
                     console.error(e);
                   }

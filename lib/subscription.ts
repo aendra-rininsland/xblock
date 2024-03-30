@@ -14,24 +14,16 @@ import {
 import { AppContext } from "@atproto/ozone";
 import { BskyAgent } from "@atproto/api";
 import DatabaseSchema from "@atproto/ozone/dist/db/schema";
-import { ModerationService } from "@atproto/ozone/dist/mod-service";
+import { ModerationServiceCreator } from "@atproto/ozone/dist/mod-service";
+import { Database } from "./db";
 
 export abstract class FirehoseSubscriptionBase {
   public sub: Subscription<RepoEvent>;
-  public db: DatabaseSchema;
+  public db: Database;
   public agent: BskyAgent;
-  public modService: ModerationService;
-  constructor(public ctx: AppContext, public service: string) {
-    this.db = ctx.db.db;
-    this.modService = this.ctx.modService(this.ctx.db);
-    this.agent = new BskyAgent({ service: ctx.cfg.appview.url });
-    this.agent
-      .login({
-        identifier: process.env.BSKY_HANDLE!,
-        password: process.env.BSKY_PASSWORD!,
-      })
-      .catch((e) => console.error(e));
-
+  constructor(public service: string, db: Database, agent: BskyAgent) {
+    this.db = db;
+    this.agent = agent;
     this.sub = new Subscription({
       service: service,
       method: ids.ComAtprotoSyncSubscribeRepos,

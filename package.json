@@ -20,7 +20,7 @@
     "@atproto/xrpc-server": "^0.4.3",
     "@huggingface/inference": "^2.6.4",
     "@types/node": "^20.11.24",
-    "@xenova/transformers": "github:xenova/transformers.js#v3",
+    "@xenova/transformers": "latest",
     "better-sqlite3": "^9.4.3",
     "dotenv": "^16.4.5",
     "execa": "^8.0.1",

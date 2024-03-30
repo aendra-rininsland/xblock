@@ -13,14 +13,6 @@ const run = async () => {
   // Ex: abcd-1234-efgh-5678
   const password = process.env.BSKY_PASSWORD!;
 
-  // A short name for the record that will show in urls
-  // Lowercase with no spaces.
-  // Ex: whats-hot
-  const recordName = process.env.LABELER_SLUG;
-
-  if (!recordName)
-    throw new Error("Forgot record name; please supply LABELER_SLUG env var");
-
   // // (Optional) A description of your feed
   // // Ex: Top trending content from the whole network
   // const description = process.env.LABELER_DESCRIPTION || "";
@@ -44,14 +36,59 @@ const run = async () => {
   const agent = new AtpAgent({ service: "https://bsky.social" });
   await agent.login({ identifier: handle, password });
 
-  try {
-    await agent.api.com.atproto.repo.deleteRecord({
-      repo: agent.session?.did ?? "",
-      collection: "app.bsky.labeler.service",
-      rkey: "self",
-    });
-    console.log("old /self record deleted");
-  } catch (e) {}
+  // try {
+  //   await agent.api.com.atproto.repo.deleteRecord({
+  //     repo: agent.session?.did ?? "",
+  //     collection: "app.bsky.labeler.service",
+  //     rkey: "self",
+  //   });
+  //   console.log("old /self record deleted");
+  // } catch (e) {}
+
+  const platforms = [
+    "Twitter",
+    "Threads",
+    "Fediverse",
+    "Bluesky",
+    "Facebook",
+    "Instagram",
+    "Tumblr",
+    "Reddit",
+  ];
+  const labelValues = [
+    ...platforms.map((l) => `${l}-screenshot`.toLowerCase()),
+    "altright-screenshot",
+  ];
+  const labelValueDefinitions = [
+    ...platforms.map((l) => ({
+      adultsOnly: false,
+      defaultSetting: "warn",
+      identifier: `${l}-screenshot`.toLowerCase(),
+      severity: "inform",
+      blurs: "media",
+      locales: [
+        {
+          lang: "en",
+          name: `${l} screenshot`,
+          description: `A screenshot taken on ${l}, contents may or may not be offensive`,
+        },
+      ],
+    })),
+    {
+      adultsOnly: false,
+      defaultSetting: "warn",
+      identifier: `altright-screenshot`,
+      severity: "inform",
+      blurs: "media",
+      locales: [
+        {
+          lang: "en",
+          name: `Alt-right platform screenshot`,
+          description: `A screenshot taken on an alt-right platform (Truth Social, Gab, et cetera), contents quite likely offensive`,
+        },
+      ],
+    },
+  ];
 
   const req = {
     repo: agent.session?.did ?? "",
@@ -62,101 +99,8 @@ const run = async () => {
       policies: {
         description:
           "Labels screenshots from Twitter (and elsewhere) because life is too short to be that angry",
-        labelValues: [
-          "twitter-screenshot",
-          "twitter-screenshot-reply",
-          "facebook-screenshot",
-          "facebook-screenshot-reply",
-          "threads-screenshot",
-          "threads-screenshot-reply",
-        ],
-        labelValueDefinitions: [
-          {
-            adultsOnly: false,
-            defaultSetting: "warn",
-            identifier: "twitter-screenshot",
-            severity: "inform",
-            blurs: "media",
-            locales: [
-              {
-                lang: "en",
-                name: "Twitter screenshot",
-                description:
-                  "A screenshot taken on X.com, formerly known as Twitter",
-              },
-            ],
-          },
-          {
-            adultsOnly: false,
-            defaultSetting: "warn",
-            identifier: "twitter-screenshot-reply",
-            severity: "inform",
-            blurs: "none",
-            locales: [
-              {
-                lang: "en",
-                name: "A reply to a Twitter screenshot",
-                description: "A reply to a Twitter screenshot",
-              },
-            ],
-          },
-          {
-            adultsOnly: false,
-            defaultSetting: "warn",
-            identifier: "threads-screenshot",
-            severity: "inform",
-            blurs: "media",
-            locales: [
-              {
-                lang: "en",
-                name: "Threads screenshot",
-                description: "A screenshot taken on Threads",
-              },
-            ],
-          },
-          {
-            adultsOnly: false,
-            defaultSetting: "warn",
-            identifier: "threads-screenshot-reply",
-            severity: "inform",
-            blurs: "none",
-            locales: [
-              {
-                lang: "en",
-                name: "Threads screenshot reply",
-                description: "A reply to a Threads screenshot",
-              },
-            ],
-          },
-          {
-            adultsOnly: false,
-            defaultSetting: "warn",
-            identifier: "facebook-screenshot",
-            severity: "inform",
-            blurs: "media",
-            locales: [
-              {
-                lang: "en",
-                name: "Facebook screenshot",
-                description: "A screenshot taken on Facebook",
-              },
-            ],
-          },
-          {
-            adultsOnly: false,
-            defaultSetting: "warn",
-            identifier: "facebook-screenshot-reply",
-            severity: "inform",
-            blurs: "none",
-            locales: [
-              {
-                lang: "en",
-                name: "Facebook screenshot reply",
-                description: "A reply to a Facebook screenshot",
-              },
-            ],
-          },
-        ],
+        labelValues,
+        labelValueDefinitions,
       },
     },
   };
