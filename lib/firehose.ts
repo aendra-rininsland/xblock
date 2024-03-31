@@ -2,11 +2,10 @@ import {
   OutputSchema as RepoEvent,
   isCommit,
 } from "@atproto/bsky/src/lexicon/types/com/atproto/sync/subscribeRepos"; // TODO fix
-
 import { AppBskyEmbedImages } from "@atproto/api/src"; // TODO fix
 import { FirehoseSubscriptionBase, getOpsByType } from "./subscription";
 import * as detect from "./detect";
-import { createReport } from "./moderate";
+import { createReport, createLabel } from "./moderate";
 import PQueue from "p-queue";
 
 let i = 0;
@@ -19,6 +18,7 @@ const IGNORED_HANDLES = [
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   backgroundQueue = new PQueue({ autoStart: true });
+
   async handleEvent(evt: RepoEvent) {
     if (!isCommit(evt)) return;
     const ops = await getOpsByType(evt);
@@ -40,18 +40,19 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
 
     if (postsToCreate.length > 0) {
       try {
-        const posts = await this.agent.app.bsky.feed
+        const { posts } = await this.agent.app.bsky.feed
           .getPosts({
             uris: postsToCreate.map((post) => post.uri),
           })
-          .then((posts) =>
-            posts.data.posts.map((post) => ({
-              ...post,
-              evt: postsToCreate.find(
-                (p) => p.did === post.did && p.cid === post.cid
-              ),
-            }))
-          );
+          .then((resp) => resp.data);
+        // .then((posts) =>
+        //   posts.data.posts.map((post) => ({
+        //     ...post,
+        //     evt: postsToCreate.find(
+        //       (p) => p.did === post.did && p.cid === post.cid
+        //     ),
+        //   }))
+        // );
 
         for (const post of posts) {
           if (AppBskyEmbedImages.isView(post.embed))
@@ -64,15 +65,16 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                   images.flatMap((d) => detect.classify(d.fullsize))
                 );
 
-                const maxTwitterScore = Math.max(
+                const maxScreenshotScore = Math.max(
                   ...detections
                     .flat()
-                    .filter((d: any) => d.label === "twitter")
+                    // .filter((d: any) => d.label === "twitter")
+                    .filter((d: any) => d.label === "social-media-screenshot")
                     .map((d: any) => d.score)
                 );
 
                 if (
-                  maxTwitterScore >= 0.98 &&
+                  maxScreenshotScore >= 0.99 &&
                   !IGNORED_HANDLES.includes(post.author.handle.toLowerCase())
                   // detections.some(
                   //   (d) => d.label === "twitter" && d.score > 0.92
@@ -81,17 +83,14 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                   // console.log(detections);
                   console.info(
                     ++i,
-                    maxTwitterScore,
+                    maxScreenshotScore,
                     detections,
                     post.uri
                       .replace("at://", "https://bsky.app/profile/")
                       .replace("app.bsky.feed.post", "post")
                   );
-                  try {
-                    // await createReport(post, maxTwitterScore, this.agent);
-                  } catch (e) {
-                    console.error(e);
-                  }
+                  await createLabel(post, this.labeler);
+                  await createReport(post, maxScreenshotScore, this.agent);
                 }
               } catch (e) {
                 console.error(e);

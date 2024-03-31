@@ -11,19 +11,24 @@ import {
   OutputSchema as RepoEvent,
   isCommit,
 } from "@atproto/bsky/src/lexicon/types/com/atproto/sync/subscribeRepos";
-import { AppContext } from "@atproto/ozone";
-import { BskyAgent } from "@atproto/api";
-import DatabaseSchema from "@atproto/ozone/dist/db/schema";
-import { ModerationServiceCreator } from "@atproto/ozone/dist/mod-service";
+import { BskyAgent, AtpAgent } from "@atproto/api";
 import { Database } from "./db";
 
 export abstract class FirehoseSubscriptionBase {
   public sub: Subscription<RepoEvent>;
   public db: Database;
   public agent: BskyAgent;
+  public labeler: AtpAgent;
   constructor(public service: string, db: Database, agent: BskyAgent) {
-    this.db = db;
     this.agent = agent;
+    this.labeler = agent.withProxy("atproto_labeler", agent.session!.did);
+    this.labeler.login({
+      identifier: process.env.BSKY_HANDLE!,
+      password: process.env.BSKY_PASSWORD!,
+    });
+
+    this.db = db;
+
     this.sub = new Subscription({
       service: service,
       method: ids.ComAtprotoSyncSubscribeRepos,

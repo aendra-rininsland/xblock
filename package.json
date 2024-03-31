@@ -4,15 +4,13 @@
   "description": "",
   "main": "lib/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 0",
-    "start": "tsx --require dotenv/config lib/index.ts",
-    "gen-lexicons": "npx @atproto/lex-cli gen-server ./lexicons ./atproto/lexicons/**/*.json",
-    "dev:start-db": "docker run -d -e POSTGRES_USER=ozone -e POSTGRES_PASSWORD=ozone -e POSTGRES_DATABASE=ozone -p 5432:5432 postgres"
+    "start": "tsx --require dotenv/config lib/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@atproto/api": "^0.12.2",
     "@atproto/bsky": "^0.0.36",
     "@atproto/lexicon": "^0.3.2",
     "@atproto/ozone": "^0.1.1",

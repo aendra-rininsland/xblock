@@ -1,37 +1,10 @@
 # used for resolving posts
-BSKY_HANDLE="<bsky username>"
-BSKY_PASSWORD="<app password>"
+BSKY_HANDLE="<bsky label service account username>"
+BSKY_PASSWORD="<bsky label service account app password>"
 
 # used in the bin/publish-labeler scripts
 LABELER_SLUG="<slug>"
 LABELER_DESCRIPTION="<description>"
 LABELER_AVATAR="<path to png or jpg file>"
 LABELER_HOSTNAME="<hostname>"
-
-# Ozone config
-NODE_ENV=dev
-VERSION=1
-OZONE_DEV_MODE=true # This allows an invalid PDS URL during development
-OZONE_PORT=3000
-OZONE_PUBLIC_URL=http://localhost:3000
-OZONE_SERVER_DID=did:web:<hostname> # possibly wrong
-OZONE_APPVIEW_URL=https://bsky.social # possibly wrong
-OZONE_APPVIEW_DID=did:web:app.bsky # possibly wrong
-#OZONE_APPVIEW_PUSH_EVENTS= # no idea what this does
-OZONE_PDS_URL=https://bsky.social
-OZONE_PDS_DID=did:web:bsky.social # I feel this is wrong?
-OZONE_DB_POSTGRES_URL=postgres://<postgres-user>:<postgres-pass>@<postgres-hostname>:<postgres-port>
-OZONE_DB_POSTGRES_SCHEMA=<postgres-schema>
-#OZONE_DB_POOL_SIZE
-#OZONE_DB_POOL_MAX_USES
-#OZONE_DB_POOL_IDLE_TIMEOUT_MS
-OZONE_DID_PLC_URL=https://plc.directory
-#OZONE_CDN_PATHS
-OZONE_ADMIN_DIDS=<dids>
-#OZONE_MODERATOR_DIDS=
-#OZONE_TRIAGE_DIDS=
-OZONE_ADMIN_PASSWORD=<password>
-OZONE_TRIAGE_PASSWORD=<password>
-OZONE_MODERATOR_PASSWORD=<password>
-# Go to https://paulmillr.com/noble/, click "show apps", click "Generate Random", copy/paste "Private key in hex format"
-OZONE_SIGNING_KEY_HEX=<Private key in hex format>
+PLC_SIG_TOKEN="<token received via email after running scripts/request-plc-signature-token>"
