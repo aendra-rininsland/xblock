@@ -49,8 +49,8 @@ const run = async () => {
       locales: [
         {
           lang: "en",
-          name: `[EXPERIMENTAL] Uncategorised screenshot`,
-          description: `Images labeled by our machine vision model as screenshots. After human intervention, this label is dropped and a more specific one is added.`,
+          name: `Uncategorised screenshot`,
+          description: `[EXPERIMENTAL] Miscellaneous screenshots detected by a computer vision model. After human intervention, this label is dropped and a more specific one is added.`,
         },
       ],
     },
