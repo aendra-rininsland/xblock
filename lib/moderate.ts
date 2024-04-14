@@ -4,7 +4,7 @@ import { ImageClassificationSingle } from "@xenova/transformers";
 export const createLabel = async (
   post: AppBskyFeedDefs.PostView,
   label: string = "uncategorised-screenshot",
-  score: number,
+  score: number | string,
   model: string,
   labeler: AtpAgent
 ) => {

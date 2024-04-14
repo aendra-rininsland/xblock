@@ -43,9 +43,10 @@ const IGNORED_HANDLES = [
   "aerialcolorado.bsky.social",
   "zoops247.bsky.social",
   "gradientbot.bsky.social",
+  "miq.moe",
 ];
 
-const MAX_IRRELEVANCY = 0.1;
+const MAX_IRRELEVANCY = 0.3;
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   backgroundQueue = new PQueue({ autoStart: true });
@@ -76,14 +77,6 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
             uris: postsToCreate.map((post) => post.uri),
           })
           .then((resp) => resp.data);
-        // .then((posts) =>
-        //   posts.data.posts.map((post) => ({
-        //     ...post,
-        //     evt: postsToCreate.find(
-        //       (p) => p.did === post.did && p.cid === post.cid
-        //     ),
-        //   }))
-        // );
 
         for (const post of posts.filter(
           (d) => !IGNORED_HANDLES.includes(d.author.handle)
@@ -96,7 +89,6 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
 
                 const detections: [string, ImageClassificationSingle[]][] =
                   await Promise.all(
-                    // images.map((d) => detect.detectPython(d.fullsize))
                     images.map(async (d) => {
                       const filename = d.fullsize.split("/").pop();
                       if (!filename)
@@ -124,13 +116,69 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                     (d) => d.label === "unrecognised-screenshot"
                   );
                   if (
+                    dets.length &&
                     (uncategorisedDetection
-                      ? uncategorisedDetection.score < 0.6
+                      ? uncategorisedDetection.score < MAX_IRRELEVANCY
                       : true) &&
                     (unrecognisedDetection
-                      ? unrecognisedDetection.score < 0.6
+                      ? unrecognisedDetection.score < MAX_IRRELEVANCY
                       : true)
-                  )
+                  ) {
+                    const instaScore =
+                      dets.find((d) => d.label === "instagram")?.score || 0;
+                    const bskyScore =
+                      dets.find((d) => d.label === "bluesky")?.score || 0;
+                    const twitterScore =
+                      dets.find((d) => d.label === "twitter")?.score || 0;
+                    if (instaScore > 0.7) {
+                      await createLabel(
+                        post,
+                        "instagram-screenshot",
+                        instaScore,
+                        detect.MODEL_NAME,
+                        this.labeler
+                      );
+                    } else if (bskyScore > 0.7) {
+                      await createLabel(
+                        post,
+                        "bluesky-screenshot",
+                        bskyScore,
+                        detect.MODEL_NAME,
+                        this.labeler
+                      );
+                    } else if (twitterScore > 0.9) {
+                      await createLabel(
+                        post,
+                        "twitter-screenshot",
+                        twitterScore,
+                        detect.MODEL_NAME,
+                        this.labeler
+                      );
+                    } else {
+                      const [topDet] = dets.sort((a, b) => b.score - a.score);
+                      if (
+                        topDet.score > 0.4 &&
+                        !["twitter", "bluesky", "instagram"].includes(
+                          topDet.label
+                        )
+                      ) {
+                        console.log(url, topDet);
+                        await createLabel(
+                          post,
+                          "uncategorised-screenshot",
+                          topDet ? `${topDet.label}:${topDet.score}` : "",
+                          detect.MODEL_NAME,
+                          this.labeler
+                        );
+                        await createReport(post, detections, this.agent);
+                      }
+                    }
+                    await addTag(
+                      post,
+                      detections,
+                      [detect.MODEL_NAME],
+                      this.labeler
+                    );
                     writer.write({
                       url,
                       ...dets.reduce(
@@ -138,154 +186,37 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                         {}
                       ),
                     });
+                  }
                 }
 
-                // const filtered = detections.filter(
-                //   (image: [string, ImageClassificationSingle[]]) => {
-                //     const [filename, dts] = image;
-                //     const maxIrrelevancyScore = dts
-                //       .filter((l) =>
-                //         ["unrecognised-screenshot", "uncategorised"].includes(
-                //           l.label
-                //         )
-                //       )
-                //       .reduce((a, c) => a + c.score, 0);
-                //     return maxIrrelevancyScore < MAX_IRRELEVANCY;
-                //   }
-                // );
-
-                // const maxSocialScreenshotScore = Math.max(
-                //   ...filtered.flatMap(([filename, d]) =>
-                //     d.map((result) =>
-                //       result.label === "social-screenshot" ? result.score : 0
-                //     )
-                //   )
-                // );
-
-                // const maxTwitterScreenshotScore = Math.max(
-                //   ...filtered.flatMap(([filename, d]) =>
-                //     d.map((result) =>
-                //       result.label === "twitter" ? result.score : 0
-                //     )
-                //   )
-                // );
-
-                // const maxRelevancyScore = Math.max(
-                //   ...filtered.map(([filename, d]) =>
-                //     d.reduce(
-                //       (a, result) =>
-                //         a +
-                //         (["twitter", "social-screenshot"].includes(result.label)
-                //           ? result.score
-                //           : 0),
-                //       0
-                //     )
-                //   )
-                // );
-
-                // const filtered = detections.filter(
-                //   ([, d]) =>
-                //     d.reduce(
-                //       (a, c) =>
-                //         ["unrecognised-screenshot", "uncategorised"].includes(
-                //           c.label
-                //         )
-                //           ? a + c.score
-                //           : a,
-                //       0
-                //     ) < 0.5
-                // );
-
-                // const hasStrongDetections = detections
-                //   .filter(
-                //     ([, d]) =>
-                //       d.reduce(
-                //         (a, c) =>
-                //           ["unrecognised-screenshot", "uncategorised"].includes(
-                //             c.label
-                //           )
-                //             ? a + c.score
-                //             : a,
-                //         0
-                //       ) < 0.5
-                //   )
-                //   .some(([k, d]) =>
-                //     d
-                //       .filter(
-                //         (l) =>
-                //           ![
-                //             "unrecognised-screenshot",
-                //             "uncategorised",
-                //           ].includes(l.label)
-                //       )
-                //       .some((l) => l.label !== "twitter" && l.score > 0.2)
-                //   );
-
-                // const hasTwitterVibes = detections
-                //   .filter(
-                //     ([, d]) =>
-                //       d.reduce(
-                //         (a, c) =>
-                //           ["unrecognised-screenshot", "uncategorised"].includes(
-                //             c.label
-                //           )
-                //             ? a + c.score
-                //             : a,
-                //         0
-                //       ) < 0.5
-                //   )
-                //   .some(([k, d]) =>
-                //     d
-                //       .filter(
-                //         (l) =>
-                //           ![
-                //             "unrecognised-screenshot",
-                //             "uncategorised",
-                //           ].includes(l.label)
-                //       )
-                //       .some((l) => l.label === "twitter" && l.score > 0.9)
-                //   );
-
-                // if (hasStrongDetections || hasTwitterVibes) {
-                //   console.info(
-                //     ++i,
-                //     post.uri
-                //       .replace("at://", "https://bsky.app/profile/")
-                //       .replace("app.bsky.feed.post", "post")
-                //   );
-                //   detections.forEach(([k, d]) => console.log(`${k}: \n`, d));
-
-                //   if (hasTwitterVibes) {
-                //     const maxTwitterScreenshotScore = Math.max(
-                //       ...detections.map(
-                //         ([l, dt]) =>
-                //           dt.find((d) => d.label === "twitter")?.score || 0
-                //       )
-                //     );
-                //     await createLabel(
-                //       post,
-                //       "twitter-screenshot",
-                //       maxTwitterScreenshotScore,
-                //       detect.MODEL_NAME,
-                //       this.labeler
-                //     );
-                //   } else {
-                //     await createReport(post, detections, this.agent);
-                //   }
-
-                //   await addTag(
-                //     post,
-                //     detections,
-                //     [detect.MODEL_NAME],
-                //     this.labeler
-                //   );
-                // }
+                if (
+                  detections.some(([, image]) =>
+                    image.some(
+                      (dt) =>
+                        ["uncategorised", "unrecognised-screenshot"].includes(
+                          dt.label
+                        ) && dt.score < MAX_IRRELEVANCY
+                    )
+                  )
+                ) {
+                  // await addTag(
+                  //   post,
+                  //   detections,
+                  //   [detect.MODEL_NAME],
+                  //   this.labeler
+                  // );
+                  // await createReport(post, detections, this.agent);
+                }
               } catch (e) {
                 console.error(e);
               }
             });
         }
-      } catch {}
+      } catch (e: any) {
+        if (e.error && e.error !== "TypeError: fetch failed") {
+          console.error(e);
+        }
+      }
     }
   }
 }
