@@ -35,19 +35,23 @@ export const classify = async (
     const otherScreenshotScore =
       pBOutput.find((d) => d.label === "other-screenshot")?.score || 0;
 
-    if (baseScore > 0.9) {
+    if (baseScore >= 0.8) {
+      console.log("TWITTER_BLUESKY", url, pBOutput);
       return pBOutput; // Terminate early if high base classes
     } else if (otherScreenshotScore > 0.5) {
       const classifierLarge = await pL;
       const pLOutput = (await classifierLarge(url, {
         topk: 4,
       })) as ImageClassificationOutput;
+      console.log("pL", url, pLOutput);
       return [...pBOutput, ...pLOutput];
     }
 
     return [];
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    if (!e.toString().includes("504 Gateway")) {
+      console.error(e);
+    }
     return [];
   }
 };
