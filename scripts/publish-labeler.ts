@@ -26,9 +26,9 @@ const run = async () => {
 
   const platforms = [
     "Twitter",
-    "Bluesky",
     "Threads",
     "Fediverse",
+    "Bluesky",
     "Facebook",
     "Instagram",
     "Tumblr",
@@ -36,8 +36,6 @@ const run = async () => {
   ];
   const labelValues = [
     `uncategorised-screenshot`,
-    "news-screenshot",
-    "ngl-screenshot",
     ...platforms.map((l) => `${l}-screenshot`.toLowerCase()),
     "altright-screenshot",
   ];
@@ -52,21 +50,7 @@ const run = async () => {
         {
           lang: "en",
           name: `Uncategorised screenshot`,
-          description: `[EXPERIMENTAL] Miscellaneous screenshots detected by a computer vision model. After human intervention, this label is dropped and a more specific one is added`,
-        },
-      ],
-    },
-    {
-      adultsOnly: false,
-      defaultSetting: "ignore",
-      identifier: `news-screenshot`,
-      severity: "inform",
-      blurs: "content",
-      locales: [
-        {
-          lang: "en",
-          name: `News media screenshot`,
-          description: `[EXPERIMENTAL] Contains a news website screenshot. Warning: blurs content instead of just media like other labels! Currently hand-moderated as I build the model`,
+          description: `[EXPERIMENTAL] Miscellaneous screenshots detected by a computer vision model. After human intervention, this label is dropped and a more specific one is added.`,
         },
       ],
     },
@@ -84,20 +68,6 @@ const run = async () => {
         },
       ],
     })),
-    {
-      adultsOnly: false,
-      defaultSetting: "ignore",
-      identifier: `ngl-screenshot`,
-      severity: "inform",
-      blurs: "media",
-      locales: [
-        {
-          lang: "en",
-          name: `NGL screenshot`,
-          description: `A screenshot taken on ngl.link, an anonymous question asking platform`,
-        },
-      ],
-    },
     {
       adultsOnly: false,
       defaultSetting: "warn",

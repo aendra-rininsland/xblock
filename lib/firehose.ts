@@ -44,9 +44,12 @@ const IGNORED_HANDLES = [
   "zoops247.bsky.social",
   "gradientbot.bsky.social",
   "miq.moe",
+  "adoptiedieren.nl",
+  "mykeystuart.bsky.social",
+  "ahistoriaemvideo.bsky.social",
 ];
 
-const MAX_IRRELEVANCY = 0.3;
+const MAX_IRRELEVANCY = 0.25;
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   backgroundQueue = new PQueue({ autoStart: true });
@@ -106,114 +109,66 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
                 const url = post.uri
                   .replace("at://", "https://bsky.app/profile/")
                   .replace("app.bsky.feed.post", "post");
-
+                console.log(url, detections);
                 for (const image of detections) {
                   const [, dets] = image;
-                  const uncategorisedDetection = dets.find(
-                    (d) => d.label === "uncategorised"
-                  );
-                  const unrecognisedDetection = dets.find(
-                    (d) => d.label === "unrecognised-screenshot"
-                  );
-                  if (
-                    dets.length &&
-                    (uncategorisedDetection
-                      ? uncategorisedDetection.score < MAX_IRRELEVANCY
-                      : true) &&
-                    (unrecognisedDetection
-                      ? unrecognisedDetection.score < MAX_IRRELEVANCY
-                      : true)
-                  ) {
-                    const instaScore =
-                      dets.find((d) => d.label === "instagram")?.score || 0;
-                    const bskyScore =
-                      dets.find((d) => d.label === "bluesky")?.score || 0;
-                    const twitterScore =
-                      dets.find((d) => d.label === "twitter")?.score || 0;
-                    if (instaScore > 0.7) {
-                      await createLabel(
-                        post,
-                        "instagram-screenshot",
-                        instaScore,
-                        detect.MODEL_NAME,
-                        this.labeler
-                      );
-                    } else if (bskyScore > 0.7) {
-                      await createLabel(
-                        post,
-                        "bluesky-screenshot",
-                        bskyScore,
-                        detect.MODEL_NAME,
-                        this.labeler
-                      );
-                    } else if (twitterScore > 0.9) {
-                      await createLabel(
-                        post,
-                        "twitter-screenshot",
-                        twitterScore,
-                        detect.MODEL_NAME,
-                        this.labeler
-                      );
-                    } else {
-                      const [topDet] = dets.sort((a, b) => b.score - a.score);
-                      if (
-                        topDet.score > 0.4 &&
-                        !["twitter", "bluesky", "instagram"].includes(
-                          topDet.label
-                        )
-                      ) {
-                        console.log(url, topDet);
+
+                  const irrelevantScore =
+                    dets.find((d) => d.label === "irrelevant")?.score || 0;
+
+                  if (dets.length) {
+                    const [topDet] = dets.sort((a, b) => b.score - a.score);
+                    if (!["irrelevant"].includes(topDet.label)) {
+                      if (topDet.score > 0.85) {
                         await createLabel(
                           post,
-                          "uncategorised-screenshot",
+                          `${topDet.label}-screenshot`,
                           topDet ? `${topDet.label}:${topDet.score}` : "",
+                          detect.MODEL_NAME_LARGE,
+                          this.labeler
+                        );
+                      } else if (
+                        topDet.label === "ngl" &&
+                        topDet.score > 0.14 // NEEDS MORE TRAINING
+                      ) {
+                        await createLabel(
+                          post,
+                          `ngl-screenshot`,
+                          `${topDet.label}:${topDet.score}`,
                           detect.MODEL_NAME,
                           this.labeler
                         );
-                        await createReport(post, detections, this.agent);
                       }
-                    }
-                    await addTag(
-                      post,
-                      detections,
-                      [detect.MODEL_NAME],
-                      this.labeler
-                    );
-                    writer.write({
-                      url,
-                      ...dets.reduce(
-                        (a, c) => ({ ...a, [c.label]: c.score }),
-                        {}
-                      ),
-                    });
-                  }
-                }
 
-                if (
-                  detections.some(([, image]) =>
-                    image.some(
-                      (dt) =>
-                        ["uncategorised", "unrecognised-screenshot"].includes(
-                          dt.label
-                        ) && dt.score < MAX_IRRELEVANCY
-                    )
-                  )
-                ) {
-                  // await addTag(
-                  //   post,
-                  //   detections,
-                  //   [detect.MODEL_NAME],
-                  //   this.labeler
-                  // );
-                  // await createReport(post, detections, this.agent);
+                      // await createReport(post, detections, this.agent);
+                      await addTag(
+                        post,
+                        detections,
+                        [detect.MODEL_NAME_LARGE],
+                        this.labeler
+                      );
+                    }
+                  }
+                  writer.write({
+                    url,
+                    ...dets.reduce(
+                      (a, c) => ({
+                        ...a,
+                        [c.label]: c.score,
+                      }),
+                      {}
+                    ),
+                  });
                 }
-              } catch (e) {
-                console.error(e);
+              } catch (e: any) {
+                if (!e.toString().includes("504 Gateway")) {
+                  console.error(e);
+                }
               }
             });
         }
       } catch (e: any) {
-        if (e.error && e.error !== "TypeError: fetch failed") {
+        if (!e?.toString()?.includes("fetch failed")) {
           console.error(e);
         }
       }
