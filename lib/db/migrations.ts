@@ -20,3 +20,20 @@ migrations["001"] = {
     await db.schema.dropTable("sub_state").execute();
   },
 };
+
+migrations["002"] = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .createTable("detections")
+      .addColumn("blobCid", "varchar", (col) => col.primaryKey())
+      .addColumn("uri", "varchar", (col) => col.notNull())
+      .addColumn("timestamp", "varchar", (col) => col.notNull())
+      .addColumn("topLabel", "varchar", (col) => col.notNull())
+      .addColumn("topScore", "numeric", (col) => col.notNull())
+      .addColumn("raw", "text", (col) => col.notNull())
+      .execute();
+  },
+  async down(db: Kysely<unknown>) {
+    await db.schema.dropTable("detections").execute();
+  },
+};
