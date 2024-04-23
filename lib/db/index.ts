@@ -18,3 +18,4 @@ export const migrateToLatest = async (db: Database) => {
 };
 
 export type Database = Kysely<DatabaseSchema>;
+export const db = createDb("./detector.db");

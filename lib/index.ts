@@ -4,11 +4,10 @@
  */
 
 import { FirehoseSubscription } from "./firehose";
-import { createDb, Database, migrateToLatest } from "./db";
+import { db, migrateToLatest } from "./db";
 import { BskyAgent } from "@atproto/api";
 
 void (async function main() {
-  const db = createDb("./detector.db");
   await migrateToLatest(db);
 
   const agent = new BskyAgent({ service: "https://bsky.social" });
