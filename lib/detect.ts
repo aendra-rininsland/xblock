@@ -10,10 +10,8 @@ env.allowRemoteModels = false;
 env.localModelPath = "../transformers.js/models";
 // console.log(env);
 
-export const MODEL_NAME_LARGE = "xblock-large-patch2-224";
+export const MODEL_NAME_LARGE = "xblock-large-patch3-224";
 export const MODEL_NAME = MODEL_NAME_LARGE;
-
-export const PRIMARY_CLASSES = ["twitter", "bluesky"];
 
 const p = pipeline("image-classification", `howdyaendra/${MODEL_NAME_LARGE}`);
 

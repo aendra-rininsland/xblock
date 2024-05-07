@@ -23,6 +23,7 @@
     "@xenova/transformers": "latest",
     "bee-queue": "^1.7.1",
     "better-sqlite3": "^9.4.3",
+    "bull-arena": "^4.2.0",
     "csv-write-stream": "^2.0.0",
     "dotenv": "^16.4.5",
     "execa": "^8.0.1",

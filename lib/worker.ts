@@ -2,12 +2,11 @@ import { AppBskyEmbedImages } from "@atproto/api";
 import { ImageClassificationSingle } from "@xenova/transformers";
 import * as detect from "./detect";
 import { createLabel, addTag } from "./moderate";
-import { agent } from "./agent";
+import { agent, isLoggedIn } from "./agent";
 import { db } from "./db";
 
 const MAX_IRRELEVANCY = 0.25;
 const MINIMUM_CONFIDENCE = 0.85;
-const MINIMUM_CONFIDENCE_NGL = 0.12;
 const IGNORED_HANDLES = [
   "nowbreezing.ntw.app",
   "moinbot.bsky.social",
@@ -21,9 +20,11 @@ const IGNORED_HANDLES = [
   "ahistoriaemvideo.bsky.social",
   "colors.bsky.social",
   "roadside.xor.blue",
+  "hourlylegs.bsky.social",
 ];
 
 export const worker = async (job: any) => {
+  await isLoggedIn;
   try {
     const postsToCreate: {
       did: string;
@@ -34,6 +35,7 @@ export const worker = async (job: any) => {
       indexedAt: string;
       images: AppBskyEmbedImages.Image[];
     }[] = job.data;
+
     const { posts } = await agent.app.bsky.feed
       .getPosts({
         uris: postsToCreate.map((post) => post.uri),
@@ -71,20 +73,10 @@ export const worker = async (job: any) => {
           const irrelevantScore =
             dets.find((d) => d.label === "irrelevant")?.score || 0;
 
-          const nglScore = dets.find((d) => d.label === "ngl")?.score || 0;
-
           if (dets.length) {
             const [topDet] = dets.sort((a, b) => b.score - a.score);
 
-            if (nglScore > MINIMUM_CONFIDENCE_NGL) {
-              await createLabel(
-                post,
-                cid,
-                `ngl-screenshot`,
-                `ngl:${nglScore}`,
-                detect.MODEL_NAME_LARGE
-              );
-            } else if (
+            if (
               topDet.score > MINIMUM_CONFIDENCE &&
               topDet.label !== "irrelevant"
             ) {
@@ -98,13 +90,11 @@ export const worker = async (job: any) => {
             }
 
             if (irrelevantScore < MAX_IRRELEVANCY) {
-              console.log(detections);
-              await addTag(post, detections, [detect.MODEL_NAME_LARGE]);
               await db
                 .insertInto("detections")
                 .values({
                   uri: url,
-                  blobCid: cid,
+                  blobCid: `${post.uri}/${cid}`,
                   timestamp: new Date().toString(),
                   topLabel: topDet.label,
                   topScore: topDet.score,
