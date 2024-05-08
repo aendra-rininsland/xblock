@@ -3,4 +3,4 @@ import { worker } from "./worker";
 
 export const queue = new Queue("posts");
 
-queue.process(25, worker);
+queue.process(10, worker);
