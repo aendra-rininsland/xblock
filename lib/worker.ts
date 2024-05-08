@@ -93,17 +93,19 @@ export const worker = async (job: any) => {
             }
 
             if (irrelevantScore < MAX_IRRELEVANCY) {
-              await db
-                .insertInto("detections")
-                .values({
-                  uri: url,
-                  blobCid: `${post.uri}/${cid}`,
-                  timestamp: new Date().toString(),
-                  topLabel: topDet.label,
-                  topScore: topDet.score,
-                  raw: JSON.stringify(dets),
-                })
-                .execute();
+              try {
+                await db
+                  .insertInto("detections")
+                  .values({
+                    uri: url,
+                    blobCid: `${post.uri}/${cid}`,
+                    timestamp: new Date().toString(),
+                    topLabel: topDet.label,
+                    topScore: topDet.score,
+                    raw: JSON.stringify(dets),
+                  })
+                  .execute();
+              } catch {}
             }
           }
         }
