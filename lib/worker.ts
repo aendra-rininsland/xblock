@@ -1,3 +1,6 @@
+import { fetch, setGlobalDispatcher, Agent } from "undici";
+setGlobalDispatcher(new Agent({ connect: { timeout: 20_000 } }));
+
 import { AppBskyEmbedImages } from "@atproto/api";
 import { ImageClassificationSingle } from "@xenova/transformers";
 import * as detect from "./detect";
@@ -104,9 +107,22 @@ export const worker = async (job: any) => {
             }
           }
         }
+
+        if (
+          detections.some(
+            ([, dets]) =>
+              !dets.some(
+                (det) =>
+                  det.label === "irrelevant" && det.score > MAX_IRRELEVANCY
+              )
+          )
+        ) {
+          await addTag(post, detections);
+        }
       }
     }
   } catch (e) {
     console.error(e);
+    console.info(job.data);
   }
 };

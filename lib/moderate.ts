@@ -1,13 +1,13 @@
 import { AppBskyFeedDefs, AtpAgent, BskyAgent } from "@atproto/api";
 import { ImageClassificationSingle } from "@xenova/transformers";
 import { agent, isLoggedIn } from "./agent";
-
+import { MODEL_NAME } from "./detect";
 export const createLabel = async (
   post: AppBskyFeedDefs.PostView,
   blobCid: string,
   label: string = "uncategorised-screenshot",
   score: number | string,
-  model: string
+  model: string = MODEL_NAME
 ) => {
   await isLoggedIn;
   try {
@@ -47,8 +47,7 @@ export const createLabel = async (
 
 export const addTag = async (
   post: AppBskyFeedDefs.PostView,
-  detections: any,
-  models: string[] = []
+  detections: any
 ) => {
   await isLoggedIn;
   try {
@@ -59,7 +58,7 @@ export const addTag = async (
         // specify the label event
         event: {
           $type: "tools.ozone.moderation.defs#modEventTag",
-          add: models.map((model) => `model:${model}`),
+          add: [`model:${MODEL_NAME}`],
           remove: [],
           comment: detections
             .map(
