@@ -123,8 +123,11 @@ export const worker = async (job: any) => {
         }
       }
     }
-  } catch (e) {
-    console.error(e);
-    console.info(job.data);
+  } catch (e: any) {
+    if (e?.error.includes("fetch failed")) {
+      throw e;
+    } else {
+      console.error(e);
+    }
   }
 };

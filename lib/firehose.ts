@@ -33,7 +33,12 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       });
 
     if (postsToCreate.length > 0) {
-      queue.createJob(postsToCreate).timeout(10000).retries(2).save();
+      queue
+        .createJob(postsToCreate)
+        .timeout(30000)
+        .backoff("fixed", 5000)
+        .retries(5)
+        .save();
     }
   }
 }
