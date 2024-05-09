@@ -89,10 +89,7 @@ export abstract class FirehoseSubscriptionBase {
 export const getOpsByType = async (evt: Commit): Promise<OperationsByType> => {
   const car = await readCar(evt.blocks);
   const opsByType: OperationsByType = {
-    posts: { creates: [], deletes: [] },
-    reposts: { creates: [], deletes: [] },
-    likes: { creates: [], deletes: [] },
-    follows: { creates: [], deletes: [] },
+    posts: [],
   };
 
   for (const op of evt.ops) {
@@ -108,25 +105,7 @@ export const getOpsByType = async (evt: Commit): Promise<OperationsByType> => {
       const record = cborToLexRecord(recordBytes);
       const create = { uri, cid: op.cid.toString(), author: evt.repo };
       if (collection === ids.AppBskyFeedPost && isPost(record)) {
-        opsByType.posts.creates.push({ record, ...create });
-      } else if (collection === ids.AppBskyFeedRepost && isRepost(record)) {
-        opsByType.reposts.creates.push({ record, ...create });
-      } else if (collection === ids.AppBskyFeedLike && isLike(record)) {
-        opsByType.likes.creates.push({ record, ...create });
-      } else if (collection === ids.AppBskyGraphFollow && isFollow(record)) {
-        opsByType.follows.creates.push({ record, ...create });
-      }
-    }
-
-    if (op.action === "delete") {
-      if (collection === ids.AppBskyFeedPost) {
-        opsByType.posts.deletes.push({ uri });
-      } else if (collection === ids.AppBskyFeedRepost) {
-        opsByType.reposts.deletes.push({ uri });
-      } else if (collection === ids.AppBskyFeedLike) {
-        opsByType.likes.deletes.push({ uri });
-      } else if (collection === ids.AppBskyGraphFollow) {
-        opsByType.follows.deletes.push({ uri });
+        opsByType.posts.push({ record, ...create });
       }
     }
   }
@@ -135,42 +114,18 @@ export const getOpsByType = async (evt: Commit): Promise<OperationsByType> => {
 };
 
 type OperationsByType = {
-  posts: Operations<PostRecord>;
-  reposts: Operations<RepostRecord>;
-  likes: Operations<LikeRecord>;
-  follows: Operations<FollowRecord>;
+  posts: CreateOp[];
 };
 
-type Operations<T = Record<string, unknown>> = {
-  creates: CreateOp<T>[];
-  deletes: DeleteOp[];
-};
-
-type CreateOp<T> = {
+export type CreateOp = {
   uri: string;
   cid: string;
   author: string;
-  record: T;
-};
-
-type DeleteOp = {
-  uri: string;
+  record: PostRecord;
 };
 
 export const isPost = (obj: unknown): obj is PostRecord => {
   return isType(obj, ids.AppBskyFeedPost);
-};
-
-export const isRepost = (obj: unknown): obj is RepostRecord => {
-  return isType(obj, ids.AppBskyFeedRepost);
-};
-
-export const isLike = (obj: unknown): obj is LikeRecord => {
-  return isType(obj, ids.AppBskyFeedLike);
-};
-
-export const isFollow = (obj: unknown): obj is FollowRecord => {
-  return isType(obj, ids.AppBskyGraphFollow);
 };
 
 const isType = (obj: unknown, nsid: string) => {

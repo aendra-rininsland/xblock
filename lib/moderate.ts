@@ -1,9 +1,11 @@
-import { AppBskyFeedDefs, AtpAgent, BskyAgent } from "@atproto/api";
 import { ImageClassificationSingle } from "@xenova/transformers";
 import { agent, isLoggedIn } from "./agent";
 import { MODEL_NAME } from "./detect";
+import { Record } from "@atproto/api/dist/client/types/app/bsky/feed/post";
+import { CreateOp } from "./subscription";
+
 export const createLabel = async (
-  post: AppBskyFeedDefs.PostView,
+  post: CreateOp,
   blobCid: string,
   label: string = "uncategorised-screenshot",
   score: number | string,
@@ -45,10 +47,7 @@ export const createLabel = async (
   }
 };
 
-export const addTag = async (
-  post: AppBskyFeedDefs.PostView,
-  detections: any
-) => {
+export const addTag = async (post: CreateOp, detections: any) => {
   await isLoggedIn;
   try {
     const { uri, cid } = post;

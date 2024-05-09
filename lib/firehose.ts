@@ -17,26 +17,15 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
 
     if (!ops) return;
 
-    const postsToCreate = ops.posts.creates
-      .filter((create) => AppBskyEmbedImages.isMain(create.record.embed))
-      .map((create) => {
-        const { images } = create.record.embed as AppBskyEmbedImages.Main;
-        return {
-          did: create.author,
-          uri: create.uri,
-          cid: create.cid,
-          replyParent: create.record?.reply?.parent.uri ?? null,
-          replyRoot: create.record?.reply?.root.uri ?? null,
-          indexedAt: new Date().toISOString(),
-          images,
-        };
-      });
+    const postsToCreate = ops.posts.filter((create) =>
+      AppBskyEmbedImages.isMain(create.record.embed)
+    );
 
     if (postsToCreate.length > 0) {
       queue
         .createJob(postsToCreate)
         .timeout(30000)
-        .backoff("fixed", 5000)
+        .backoff("exponential", 2000)
         .retries(5)
         .save();
     }
