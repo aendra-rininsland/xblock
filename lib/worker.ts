@@ -42,8 +42,8 @@ export const worker = async ({ data: postsToCreate }: { data: CreateOp[] }) => {
 
     const detections: [string, ImageClassificationSingle[]][] =
       await Promise.all(
-        images.map(async (d) => {
-          const cid = d.image.ref.toString();
+        images.map(async (d: any) => {
+          const cid = d.image.ref.$link;
           const detections = await detect.classify(
             `https://cdn.bsky.app/img/feed_fullsize/plain/${post.author}/${cid}@jpeg`
           );
