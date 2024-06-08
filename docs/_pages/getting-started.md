@@ -1,51 +1,49 @@
 ---
 layout: page
-title: Getting started with Reverie
+title: Getting started with XBlock
 permalink: /getting-started/
 ---
 
-### Step 1) Fork Reverie to your User Repository
+### Step 1) Subscribe to XBlock
 
-Fork [this repository](https://github.com/amitmerchant1990/reverie), then rename the repository to `yourgithubusername.github.io`.
+In the Bluesky app, visit [@xblock.aendra.dev][1] and click "Subscribe to Labeler":
 
-Alternatively, you can use [Use this template](https://github.com/amitmerchant1990/reverie/generate) button if you want to create a repository with a clean commit history which will use Reverie as a template.
+![A screenshot of the XBlock profile page. "Subscribe to Labeler" is circled](/images/screenshot1.png)
 
-Your Jekyll blog will often be viewable immediately at <https://yourgithubusername.github.io> (if it's not, you can often force it to build by completing step 2)
+### Step 2) Configure your label visibility settings
 
-### Step 2) Customize and view your site
+Just below that, configure each label. 
 
-Enter your site name, description, avatar and many other options by editing the `_config.yml` file. You can easily turn on Google Analytics tracking, Disqus commenting and social icons here.
+- "Off": Ignore the label setting; posts with label will display normally
+- "Warn": Hides labelled content behind a toggleable warning. This is a good setting to start out with!
+- "Hide": Hides the content altogether.
 
-Making a change to `_config.yml` (or any file in your repository) will force GitHub Pages to rebuild your site with jekyll. Your rebuilt site will be viewable a few seconds later at <https://yourgithubusername.github.io> - if not, give it ten minutes as GitHub suggests and it'll appear soon.
+![A screenshot of the labels offered by XBlock, with three settings for each: "off", "warn" and "hide"](/images/screenshot2.png)
 
-### Step 3) Publish your first blog post
+### Step 3) Report mislabelled or unlabelled screenshots using Bluesky's interface
 
-Create a new file called `/_posts/2019-2-13-Hello-World.md` to publish your first blog post. That's all you need to do to publish your first blog post! This [Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) might come in handy while writing the posts.
+If we've missed a screenshot, please report it to us using Bluesky's built-in tools. To do this:
 
-> You can add additional posts in the browser on GitHub.com too! Just hit the <kbd>Create new file</kbd> button in `/_posts/` to create new content. Just make sure to include the [front-matter](http://jekyllrb.com/docs/frontmatter/) block at the top of each new blog post and make sure the post's filename is in this format: year-month-day-title.md
+#### 1) Click the post options button ("...") and select "Report post"
 
-## Using Categories in Reverie
+![A screenshot of the post options flyout menu "Report post" is selected](/images/screenshot3.png)
 
-You can categorize your content based on `categories` in Reverie. For this, you just need to add `categories` in front matter like below:
+#### 2) Select "XBlock Screenshot Labeler" from the list
 
-For adding single category:
+![A link to submit a report to XBlock](/images/screenshot4.png)
 
-```md
-categories: JavaScript
-```
+#### 3) Choose any category of report
 
-For adding multiple categories:
+It doesn't really matter which!
 
-```md
-categories: [PHP, Laravel]
-```
+#### 4) Add more detail
 
-The contegorized content can be shown over this URL: <https://yourgithubusername.github.io/categories/>
+In the report body, please put what you expect it should be! It helps us moderate.
+Don't sweat it if you're not sure what to put though, we'll be able to figure it out!
 
-## RSS
+![The report post dialog](/images/screenshot5.png)
 
-The generated [RSS feed](https://en.wikipedia.org/wiki/RSS) of your blog can be found at <https://yourgithubusername.github.io/feed>. You can see the example RSS feed over [here](https://www.amitmerchant.com/reverie/feed).
+#### 5) Click submit
 
-## Sitemap
-
-The generated sitemap of your blog can be found at <https://yourgithubusername.github.io/sitemap>. You can see the example sitemap feed over [here](https://www.amitmerchant.com/reverie/sitemap).
+We won't be able to let you know whether your report has been actioned but rest assured
+we appreciate your report! Reporting screenshots helps us improve our training data!
