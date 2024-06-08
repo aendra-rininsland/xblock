@@ -1,0 +1,185 @@
+{
+    "description": "Labels screenshots from Twitter (and elsewhere) because life is too short to be that angry",
+    "labelValues": [
+      "twitter-screenshot",
+      "bluesky-screenshot",
+      "altright-screenshot",
+      "ngl-screenshot",
+      "threads-screenshot",
+      "fediverse-screenshot",
+      "facebook-screenshot",
+      "instagram-screenshot",
+      "tumblr-screenshot",
+      "reddit-screenshot"
+    ],
+    "labelValueDefinitions": [
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Uncategorised screenshot",
+            "description": "[EXPERIMENTAL] Miscellaneous screenshots detected by a computer vision model. After human intervention, this label is dropped and a more specific one is added"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "uncategorised-screenshot",
+        "defaultSetting": "ignore"
+      },
+      {
+        "blurs": "content",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "News media screenshot",
+            "description": "[EXPERIMENTAL] Contains a news website screenshot. Warning: blurs content instead of just media like other labels! Currently hand-moderated as I build the model"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "news-screenshot",
+        "defaultSetting": "ignore"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible Twitter screenshot",
+            "description": "Potentially a screenshot taken on Twitter, contents may or may not be offensive"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "twitter-screenshot",
+        "defaultSetting": "warn"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible Bluesky screenshot",
+            "description": "Potentially a screenshot taken on Bluesky, contents may or may not be offensive"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "bluesky-screenshot",
+        "defaultSetting": "warn"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible Threads screenshot",
+            "description": "Potentially a screenshot taken on Threads, contents may or may not be offensive"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "threads-screenshot",
+        "defaultSetting": "warn"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible Fediverse screenshot",
+            "description": "Potentially a screenshot taken on Fediverse, contents may or may not be offensive"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "fediverse-screenshot",
+        "defaultSetting": "warn"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible Facebook screenshot",
+            "description": "Potentially a screenshot taken on Facebook, contents may or may not be offensive"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "facebook-screenshot",
+        "defaultSetting": "warn"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible Instagram screenshot",
+            "description": "Potentially a screenshot taken on Instagram, contents may or may not be offensive"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "instagram-screenshot",
+        "defaultSetting": "warn"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible Tumblr screenshot",
+            "description": "Potentially a screenshot taken on Tumblr, contents may or may not be offensive"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "tumblr-screenshot",
+        "defaultSetting": "warn"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible Reddit screenshot",
+            "description": "Potentially a screenshot taken on Reddit, contents may or may not be offensive"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "reddit-screenshot",
+        "defaultSetting": "warn"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible NGL screenshot",
+            "description": "Potentially a screenshot taken on ngl.link, an anonymous question asking platform"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "ngl-screenshot",
+        "defaultSetting": "ignore"
+      },
+      {
+        "blurs": "media",
+        "locales": [
+          {
+            "lang": "en",
+            "name": "Possible alt-right platform screenshot",
+            "description": "Potentially a screenshot taken on an alt-right platform (Truth Social, Gab, et cetera), contents quite likely offensive"
+          }
+        ],
+        "severity": "inform",
+        "adultOnly": false,
+        "identifier": "altright-screenshot",
+        "defaultSetting": "warn"
+      }
+    ]
+  }
