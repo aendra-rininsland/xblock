@@ -1,3 +1,9 @@
+---
+layout: page
+title: About
+permalink: /about/
+---
+
 # XBlock
 ## _a screenshot moderation service on [Bluesky][1] by [ændra.][2]_
 
