@@ -41,7 +41,7 @@ const run = async () => {
   ];
   const labelValueDefinitions = [
     {
-      adultsOnly: false,
+      adultOnly: false,
       defaultSetting: "ignore",
       identifier: `uncategorised-screenshot`,
       severity: "inform",
@@ -55,7 +55,7 @@ const run = async () => {
       ],
     },
     ...platforms.map((l) => ({
-      adultsOnly: false,
+      adultOnly: false,
       defaultSetting: "warn",
       identifier: `${l}-screenshot`.toLowerCase(),
       severity: "inform",
@@ -69,7 +69,7 @@ const run = async () => {
       ],
     })),
     {
-      adultsOnly: false,
+      adultOnly: false,
       defaultSetting: "warn",
       identifier: `altright-screenshot`,
       severity: "inform",
