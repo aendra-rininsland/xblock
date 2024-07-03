@@ -3,9 +3,6 @@ import { cborToLexRecord, readCar } from "@atproto/repo";
 import { BlobRef } from "@atproto/lexicon";
 import { ids, lexicons } from "@atproto/bsky/src/lexicon/lexicons";
 import { Record as PostRecord } from "@atproto/bsky/src/lexicon/types/app/bsky/feed/post";
-import { Record as RepostRecord } from "@atproto/bsky/src/lexicon/types/app/bsky/feed/repost";
-import { Record as LikeRecord } from "@atproto/bsky/src/lexicon/types/app/bsky/feed/like";
-import { Record as FollowRecord } from "@atproto/bsky/src/lexicon/types/app/bsky/graph/follow";
 import {
   Commit,
   OutputSchema as RepoEvent,
@@ -103,7 +100,13 @@ export const getOpsByType = async (evt: Commit): Promise<OperationsByType> => {
       const recordBytes = car.blocks.get(op.cid);
       if (!recordBytes) continue;
       const record = cborToLexRecord(recordBytes);
-      const create = { uri, cid: op.cid.toString(), author: evt.repo };
+
+      const create = {
+        uri,
+        cid: op.cid.toString(),
+        author: evt.repo,
+      };
+
       if (collection === ids.AppBskyFeedPost && isPost(record)) {
         opsByType.posts.push({ record, ...create });
       }
@@ -122,6 +125,7 @@ export type CreateOp = {
   cid: string;
   author: string;
   record: PostRecord;
+  embed?: any;
 };
 
 export const isPost = (obj: unknown): obj is PostRecord => {
@@ -130,9 +134,11 @@ export const isPost = (obj: unknown): obj is PostRecord => {
 
 const isType = (obj: unknown, nsid: string) => {
   try {
-    lexicons.assertValidRecord(nsid, fixBlobRefs(obj));
+    const fixed = fixBlobRefs(obj);
+    lexicons.assertValidRecord(nsid, obj);
     return true;
   } catch (err) {
+    console.log(err);
     return false;
   }
 };

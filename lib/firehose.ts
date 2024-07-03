@@ -2,9 +2,9 @@ import {
   OutputSchema as RepoEvent,
   isCommit,
 } from "@atproto/bsky/src/lexicon/types/com/atproto/sync/subscribeRepos"; // TODO fix
-import { AppBskyEmbedImages } from "@atproto/api/src"; // TODO fix
 import { FirehoseSubscriptionBase, getOpsByType } from "./subscription";
 import { queue } from "./queue";
+import { login } from "./agent";
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleEvent(evt: RepoEvent) {
@@ -12,14 +12,13 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
 
     const ops = await getOpsByType(evt).catch((e) => {
       console.error("repo subscription could not handle message", e);
-      return undefined;
+      // if (e.code === "EAI_AGAIN") return login().then(() => getOpsByType(evt));
     });
 
-    if (!ops) return;
-
-    const postsToCreate = ops.posts.filter((create) =>
-      AppBskyEmbedImages.isMain(create.record.embed)
-    );
+    if (!ops || !ops.posts?.length) return;
+    const postsToCreate = ops.posts
+      .filter((create) => create.record.embed?.images)
+      .filter((i) => i);
 
     if (postsToCreate.length > 0) {
       queue

@@ -9,28 +9,29 @@ import { CreateOp } from "./subscription";
 const MAX_IRRELEVANCY = 0.25;
 const MINIMUM_CONFIDENCE = 0.85;
 
-// TODO: compute DIDs for handles
-const IGNORED_HANDLES = [
-  "nowbreezing.ntw.app",
-  "moinbot.bsky.social",
-  "kctv.bsky.social",
-  "aerialcolorado.bsky.social",
-  "zoops247.bsky.social",
-  "gradientbot.bsky.social",
-  "miq.moe",
-  "adoptiedieren.nl",
-  "mykeystuart.bsky.social",
-  "ahistoriaemvideo.bsky.social",
-  "colors.bsky.social",
-  "roadside.xor.blue",
-  "hourlylegs.bsky.social",
+const IGNORED_DIDS = [
+  "did:plc:mcb6n67plnrlx4lg35natk2b", // nowbreezing.ntw.app
+  "did:plc:ymzacrnsjirzupb4vwiazhm7", // moinbot.bsky.social
+  "did:plc:gyq7t7tyn4pkqavqqv5debdp", // kctv.bsky.social
+  "did:plc:l7ifpnhmxibgzxmw5i4fowea", // aerialcolorado.bsky.social
+  "did:plc:ewvo3ovbzgl5tq6oklmwrapy", // zoops247.bsky.social
+  "did:plc:aulhpk4m5pfpfr3hid24tmop", // gradientbot.bsky.social
+  "did:plc:bb2sdgakqp3yuz2heo6jonrt", // miq.moe
+  "did:plc:zwul4quy66xlgohmzq2at5jq", // adoptiedieren.nl
+  "did:plc:f7qo7c4hbii7nz7mbzx6t3o4", // mykeystuart.bsky.social
+  "did:plc:vqhaiylwzzxvjqfxznz3csuq", // ahistoriaemvideo.bsky.social
+  "did:plc:m4jfpmor7wcmqfll22pu56ej", // colors.bsky.social
+  "did:plc:ozjtqqab26axmvi3rygbtw6y", // roadside.xor.blue
+  "did:plc:y3crhppe4bnnjgbqqlof6ok3", // hourlylegs.bsky.social
+  "did:plc:uqsv2fby2su6dj3wstxsnzkv", // bbcradio1bot.bsky.social
 ];
 
 export const worker = async ({ data: postsToCreate }: { data: CreateOp[] }) => {
   await isLoggedIn;
+  const results = new Map();
 
   for (const post of postsToCreate.filter(
-    (d) => !IGNORED_HANDLES.includes(d.author)
+    (d) => !IGNORED_DIDS.includes(d.author)
   )) {
     const url = post.uri
       .replace("at://", "https://bsky.app/profile/")
@@ -54,6 +55,7 @@ export const worker = async ({ data: postsToCreate }: { data: CreateOp[] }) => {
 
     for (const image of detections) {
       const [cid, dets] = image;
+      results.set(cid, dets);
 
       const irrelevantScore =
         dets.find((d) => d.label === "irrelevant")?.score || 0;
@@ -78,7 +80,8 @@ export const worker = async ({ data: postsToCreate }: { data: CreateOp[] }) => {
           );
         }
 
-        if (irrelevantScore < MAX_IRRELEVANCY) {
+        if (irrelevantScore < MAX_IRRELEVANCY || process.env.RECORD_ALL) {
+          console.log(url, topDet.label, topDet.score);
           try {
             await db
               .insertInto("detections")

@@ -18,17 +18,10 @@ const p = pipeline("image-classification", `howdyaendra/${MODEL_NAME_LARGE}`);
 export const classify = async (
   url: string
 ): Promise<ImageClassificationSingle[]> => {
-  try {
-    const classifier = await p;
-    const result = (await classifier(url, {
-      topk: 4,
-    })) as ImageClassificationOutput;
+  const classifier = await p;
+  const result = (await classifier(url, {
+    topk: 4,
+  })) as ImageClassificationOutput;
 
-    return result;
-  } catch (e: any) {
-    if (!e.toString().includes("504 Gateway")) {
-      console.error(e);
-    }
-    return [];
-  }
+  return result;
 };
