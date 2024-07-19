@@ -24,6 +24,13 @@ const IGNORED_DIDS = [
   "did:plc:ozjtqqab26axmvi3rygbtw6y", // roadside.xor.blue
   "did:plc:y3crhppe4bnnjgbqqlof6ok3", // hourlylegs.bsky.social
   "did:plc:uqsv2fby2su6dj3wstxsnzkv", // bbcradio1bot.bsky.social
+  "did:plc:ywbm3iywnhzep3ckt6efhoh7", // katie tightpussy
+  "did:plc:nin37dqg23nevv4x4wr3kc6d", // aboveedxw.mastodon.social.ap.brid.gy
+  "did:plc:y2g5vymm2cvveec6cnspcvzo", // aboveedxw.de
+  "did:plc:pj5mfw6xjh2x6cjdlyxxngra", // upnextcriterion.bsky.social
+  "did:plc:dnrkktjuabxs76dop3ucwspn", // bbcasiannetworkbot.bsky.social
+  "did:plc:qlbcbxs5lems6o5e3c4hsdmt", // bbcradio2bot.bsky.social
+  "did:plc:om2ttmoe5t7py2jqiii5mvj3", // bbcradio1xtrabot.bsky.social
 ];
 
 export const worker = async ({ data: postsToCreate }: { data: CreateOp[] }) => {
